@@ -1,11 +1,16 @@
 "use client";
 import Image from "next/image";
-import noPicture from '../app/assets/picturenone.png'
+import GifPadlock from "../app/assets/gifpadlock.gif";
+import Success from "../app/assets/success.gif";
+import GifPadlock2 from "../app/assets/gifpacklock2.gif";
+import noPicture from "../app/assets/picturenone.png";
 import { useState, useEffect } from "react";
 import { GiPadlock } from "react-icons/gi";
 import { IoSearchSharp } from "react-icons/io5";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css"; // Para importar o estilo da barra circular
+
+import VerticalIcons from "../components/VerticalProgress";
 
 interface InstagramUser {
   id: string;
@@ -21,6 +26,10 @@ export default function Home() {
   const [progress, setProgress] = useState(0); // Percentual de progresso
   const [showImage, setShowImage] = useState(false); // Para controlar quando mostrar a imagem
   const [primaryProgress, setPrimaryProgress] = useState(25); // Progresso da barra principal, começa em 25%
+
+  const [decryptionProgress, setDecryptionProgress] = useState(false);
+  const [progressDecry, setProgressDecry] = useState(0);
+  
 
   useEffect(() => {
     if (loading) {
@@ -77,23 +86,59 @@ export default function Home() {
       setLoading(false);
     }
   };
+  const [showFirst, setShowFirst] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowFirst((prev) => !prev);
+    }, 3000); // Alterna a cada 1 segundo (ajuste o tempo conforme necessário)
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-[#171531]">
-      <div className="w-full max-w-md p-6 bg-[#232048] rounded-lg shadow-lg">
-        {progress === 0 && (
-          <h1 className="text-center text-2xl font-bold text-cyan-400 sm:text-3xl">
-            Logo
-          </h1>
-        )}
-
-        <div className="relative w-full h-2 bg-gray-700 rounded-full mt-4">
+    <div className="flex flex-col items-center  h-screen bg-[#171531]">
+      <div className=" w-full max-w-md  my-10 space-y-5">
+        <div className="relative w-full max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
           <div
             className="h-2 bg-cyan-400 rounded-full transition-all duration-500"
             style={{ width: `${primaryProgress}%` }} // Barra principal
           ></div>
         </div>
 
+        {progress < 10 && (
+          <h1 className="text-center text-2xl font-bold text-cyan-400 sm:text-3xl">
+            Logo
+          </h1>
+        )}
+        {decryptionProgress && (
+        <div>
+           {progressDecry < 100 && (
+            <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
+   <Image
+              src={GifPadlock2}
+              alt="Loading..."
+              className="w-60 h-44 scale-100 -mt-0 object-cover "
+            />
+            </div>
+
+          ) }
+          {progressDecry === 100 && (
+            <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
+ <Image
+            src={Success}
+            alt="Loading..."
+            className="w-72 h-72 -mt-16 scale-150 object-cover transition-opacity duration-500"
+          />
+            </div>
+
+          ) }
+         
+        </div>
+      )}
+      </div>
+
+      <div className="w-full max-w-md p-6 bg-[#232048] rounded-lg shadow-lg">
         {!firstUser ? (
           <div className="mt-6 space-y-8 p-6 rounded-lg bg-[#232048]">
             <h1 className="text-center text-2xl font-semibold text-white sm:text-3xl">
@@ -134,79 +179,88 @@ export default function Home() {
             </span>
           </div>
         ) : (
-          <div className="flex flex-col items-center p-6 rounded-lg bg-[#232048]">
-            <h2 className="text-white text-xl font-semibold">Resultado:</h2>
-            <div className="relative w-[120px] h-[120px]">
-              <CircularProgressbar
-                value={progress}
-                strokeWidth={3}
-                styles={buildStyles({
-                  pathColor: "#ffffff", // Cor da barra
-                  textColor: "#fff", // Cor do texto (percentual)
-                  trailColor: "#3e3e3e", // Cor do fundo
-                })}
-              />
-              {progress < 100 ? (
-                <div className="text-white font-semibold text-xl flex flex-col text-center">
-                  <Image
-                   
-                     src={noPicture}
-                    alt={firstUser.username}
-                    width={110}
-                    height={110}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
-                  />
-                </div>
-              ) : (
-                <div>
-                  <Image
-                    src={firstUser.profile_pic_url}
-                    alt={firstUser.username}
-                    width={110}
-                    height={110}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
-                  />
-                </div>
-              )}
-            </div>
-            {progress < 100 && (
-              <div className="text-white font-semibold text-xl flex flex-col text-center">
-                <h1 className="text-3xl my-2">Analisando...</h1>
+          <div>
+            {!decryptionProgress ? (
+              <div>
+                <div className="flex flex-col items-center p-6 rounded-lg bg-[#232048]">
+                  <h2 className="text-white text-xl font-semibold">
+                    Resultado:
+                  </h2>
+                  <div className="relative w-[120px] h-[120px]">
+                    <CircularProgressbar
+                      value={progress}
+                      strokeWidth={3}
+                      styles={buildStyles({
+                        pathColor: "#ffffff", // Cor da barra
+                        textColor: "#fff", // Cor do texto (percentual)
+                        trailColor: "#3e3e3e", // Cor do fundo
+                      })}
+                    />
+                    {progress < 100 ? (
+                      <div className="text-white font-semibold text-xl flex flex-col text-center">
+                        <Image
+                          src={noPicture}
+                          alt={firstUser.username}
+                          width={110}
+                          height={110}
+                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <Image
+                          src={firstUser.profile_pic_url}
+                          alt={firstUser.username}
+                          width={110}
+                          height={110}
+                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {progress < 100 && (
+                    <div className="text-white font-semibold text-xl flex flex-col text-center">
+                      <h1 className="text-3xl my-2">Analisando...</h1>
 
-                <h2 className="px-0 flex">
-                  {" "}
-                  Nosso sistema está procurando falhas segurança nessa conta
-                  para achar uma brecha
-                </h2>
+                      <h2 className="px-0 flex">
+                        {" "}
+                        Nosso sistema está procurando falhas segurança nessa
+                        conta para achar uma brecha
+                      </h2>
+                    </div>
+                  )}
+                  {progress === 100 && (
+                    <>
+                      <p className="text-white text-lg font-medium">
+                        {firstUser.full_name}
+                      </p>
+                      <p className="text-gray-400">@{firstUser.username}</p>
+                    </>
+                  )}
+                  {progress === 100 && (
+                    <div className="mt-4 flex flex-col space-y-4 text-center">
+                      <h1 className=" text-white font-normal text-xl px-4 py-2 ">
+                        Podemos prosseguir ?
+                      </h1>
+                      <button
+                        className="bg-cyan-600 text-white font-semibold text-xl px-8 py-2 rounded-lg hover:bg-cyan-700"
+                        onClick={() => setDecryptionProgress(true)}
+                      >
+                        Continuar, o perfil está correto
+                      </button>
+                      <button
+                        className=" text-white font-semibold px-4 py-2 rounded-lg hover:text-slate-400"
+                        onClick={() => setFirstUser(null)}
+                      >
+                        Não, quero corrigir
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-            {progress === 100 && (
-              <>
-                <p className="text-white text-lg font-medium">
-                  {firstUser.full_name}
-                </p>
-                <p className="text-gray-400">@{firstUser.username}</p>
-              </>
-            )}
-            {progress === 100 && (
-              <div className="mt-4 flex flex-col space-y-4 text-center">
-                <h1
-                  className=" text-white font-normal text-xl px-4 py-2 "
-                >
-                     Podemos prosseguir ?
-                </h1>
-                <button
-                  className="bg-cyan-600 text-white font-semibold text-xl px-8 py-2 rounded-lg hover:bg-cyan-700"
-                  onClick={() => console.log("Perfil correto")}
-                >
-                  Continuar, o perfil está correto
-                </button>
-                <button
-                  className=" text-white font-semibold px-4 py-2 rounded-lg hover:text-slate-400"
-                  onClick={() => setFirstUser(null)}
-                >
-                  Não, quero corrigir
-                </button>
+            ) : (
+              <div>
+                <VerticalIcons progress={progressDecry} setProgress={setProgressDecry}/>
               </div>
             )}
           </div>
