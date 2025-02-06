@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { GiPadlock } from "react-icons/gi";
+import { IoSearchSharp } from "react-icons/io5";
 
 interface InstagramUser {
   id: string;
@@ -12,10 +13,14 @@ interface InstagramUser {
 
 export default function Home() {
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState<InstagramUser[]>([]);
+  const [firstUser, setFirstUser] = useState<InstagramUser | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
     if (!search) return;
+    
+    setLoading(true);
+    setFirstUser(null); // Resetando o estado ao iniciar a busca
 
     try {
       const response = await fetch(
@@ -23,132 +28,102 @@ export default function Home() {
         {
           method: "GET",
           headers: {
-            "x-rapidapi-key":
-              "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+            "x-rapidapi-key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
             "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
           },
         }
       );
 
       const data = await response.json();
-      console.log("Dados recebidos:", data);
-      console.log("id do primeiro user", data.data.users[0].id);
 
-      if (data.data.users[0].id) {
-        setUsers(
-          data.data.users.map((user: any) => ({
-            id: user.id,
-            username: user.username,
-            full_name: user.full_name,
-            profile_pic_url: user.profile_pic_url,
-          }))
-        );
-
-        console.log(users);
-      } else {
-        setUsers([]);
+      if (data.data.users.length > 0) {
+        const user = data.data.users[0]; // Pegando apenas o primeiro usuário
+        setFirstUser({
+          id: user.id,
+          username: user.username,
+          full_name: user.full_name,
+          profile_pic_url: user.profile_pic_url,
+        });
       }
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
-      setUsers([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      {/*
-  Heads up! 👋
+    <div className="flex flex-col items-center justify-center h-screen bg-[#171531]">
+      <div className="mx-auto max-w-screen-xl px-8 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-xs sm:max-w-xs lg:max-w-md ">
+          <h1 className="text-center text-2xl font-bold text-cyan-400 sm:text-3xl">
+            Logo
+          </h1>
 
-  Plugins:
-    - @tailwindcss/forms
-*/}
+          {!firstUser ? (
+            <div className="mt-6 space-y-8 p-6 rounded-lg shadow-lg sm:p-6 lg:px-20 lg:py-20 bg-[#232048]">
+              <h1 className="text-center text-2xl font-semibold text-white sm:text-3xl">
+                Espione <span className="text-blue-500">qualquer pessoa</span>{" "}
+                apenas com o <span className="font-bold">@</span> 
+              </h1>
 
-<div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
-  <div className="mx-auto max-w-lg">
-  <div>
-  <span id="ProgressLabel" className="sr-only">Loading</span>
-  <div
-    role="progressbar"
-    aria-labelledby="ProgressLabel"
-    aria-valuenow={25} 
-    className="block rounded-full bg-gray-200"
-    style={{ width: '100%' }}  
-  >
-    <div className="block h-3 rounded-full bg-indigo-600" style={{ width: '25%' }}></div>
-  </div>
-</div>
+              <hr />
 
-    <h1 className="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">Logo</h1>
- 
-  
+              <p className="text-center text-lg font-medium text-white ">
+                Coloque o <span className="text-cyan-400">@ </span>da pessoa que você quer espionar
+              </p>
 
-    <form action="#" className="mt-6 mb-0 space-y-4 rounded-lg p-4 shadow-lg sm:p-6 lg:p-8">
-    <h1 className="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">   Espione qualquer
-pessoa apenas
-com o @</h1>
-      <hr />
+              <div>
+                <div className="relative mb-5">
+                  <input
+                    type="search"
+                    placeholder="Ex.: neymarjr"
+                    className="rounded-xl w-full p-3 outline-none text-white bg-[#232048] border border-cyan-400"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
 
-      <p className="text-center text-lg font-medium">Coloque o @ da pessoa que você quer espionar</p>
-
-      <div>
-        <label htmlFor="email" className="sr-only">Email</label>
-
-        <div className="relative">
-        <input
-          type="search"
-          placeholder="Buscar... (Nome de usuário)"
-          className="w-full p-2 outline-none text-black"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      
-          <span className="absolute inset-y-0 end-0 grid place-content-center px-4">
-          <button
-          className="bg-blue-500 text-white px-4 py-2 hover:bg-blue-600"
-          onClick={handleSearch}
-        >
-          Buscar
-        </button>
-          </span>
-        </div>
-      </div>
-      
-
-      <p className="text-center text-sm text-gray-500">
-      <GiPadlock />
-      Dados seguros, a pessoa não saberá que você tentou espionar ela
-      </p>
-    </form>
-  </div>
-</div>
-      <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden w-full max-w-md">
-        
-      </div>
-      <div className="mt-4 w-full max-w-md">
-        {users.length > 0 ? (
-          users.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center p-2 border-b border-gray-200"
-            >
-             <Image
-        src={user.profile_pic_url}
-        alt={user.username}
-        width={48}
-        height={48}
-        className="rounded-full mr-3"
-      />
-               <div>
-                <p className="font-semibold">{user.full_name}</p>
-                <p className="text-gray-500">@{user.username}</p>
+                  <span className="absolute inset-y-0 end-0 grid place-content-center px-3">
+                    <button
+                      className="rounded-lg bg-cyan-400 text-black px-4 py-2 hover:bg-cyan-400"
+                      onClick={handleSearch}
+                      disabled={loading}
+                    >
+                      {loading ? "Buscando..." : <IoSearchSharp />}
+                    </button>
+                  </span>
+                </div>
               </div>
+
+              <span className="text-center text-sm text-gray-500 relative ">
+                <GiPadlock className=" text-cyan-400 text-2xl mt-4 absolute " />
+                <span className="flex flex-col">
+                  <p className="mt-1 text-base">Dados seguros, a pessoa não</p>
+                  <p>saberá que você tentou espionar ela</p>
+                </span>
+              </span>
             </div>
-          ))
-        ) : (
-          <p className="text-gray-500 text-center mt-4">
-            Nenhum usuário encontrado.
-          </p>
-        )}
+          ) : (
+            <div className="flex flex-col items-center p-6 rounded-lg shadow-lg bg-[#232048]">
+              <h2 className="text-white text-xl font-semibold">Resultado:</h2>
+              <Image
+                src={firstUser.profile_pic_url}
+                alt={firstUser.username}
+                width={120}
+                height={120}
+                className="rounded-full my-4"
+              />
+              <p className="text-white text-lg font-medium">{firstUser.full_name}</p>
+              <p className="text-gray-400">@{firstUser.username}</p>
+              <button
+                className="mt-4 bg-cyan-400 text-black px-4 py-2 rounded-lg hover:bg-cyan-300"
+                onClick={() => setFirstUser(null)}
+              >
+                Nova Busca
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
