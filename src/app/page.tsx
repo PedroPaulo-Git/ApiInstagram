@@ -1,101 +1,155 @@
+"use client";
 import Image from "next/image";
+import { useState } from "react";
+import { GiPadlock } from "react-icons/gi";
+
+interface InstagramUser {
+  id: string;
+  username: string;
+  full_name: string;
+  profile_pic_url: string;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [search, setSearch] = useState("");
+  const [users, setUsers] = useState<InstagramUser[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSearch = async () => {
+    if (!search) return;
+
+    try {
+      const response = await fetch(
+        `https://instagram-scraper-api2.p.rapidapi.com/v1.2/search?search_query=${search}`,
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-key":
+              "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+            "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
+          },
+        }
+      );
+
+      const data = await response.json();
+      console.log("Dados recebidos:", data);
+      console.log("id do primeiro user", data.data.users[0].id);
+
+      if (data.data.users[0].id) {
+        setUsers(
+          data.data.users.map((user: any) => ({
+            id: user.id,
+            username: user.username,
+            full_name: user.full_name,
+            profile_pic_url: user.profile_pic_url,
+          }))
+        );
+
+        console.log(users);
+      } else {
+        setUsers([]);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+      setUsers([]);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen">
+      {/*
+  Heads up! 👋
+
+  Plugins:
+    - @tailwindcss/forms
+*/}
+
+<div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
+  <div className="mx-auto max-w-lg">
+  <div>
+  <span id="ProgressLabel" className="sr-only">Loading</span>
+  <div
+    role="progressbar"
+    aria-labelledby="ProgressLabel"
+    aria-valuenow={25} 
+    className="block rounded-full bg-gray-200"
+    style={{ width: '100%' }}  
+  >
+    <div className="block h-3 rounded-full bg-indigo-600" style={{ width: '25%' }}></div>
+  </div>
+</div>
+
+    <h1 className="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">Logo</h1>
+ 
+  
+
+    <form action="#" className="mt-6 mb-0 space-y-4 rounded-lg p-4 shadow-lg sm:p-6 lg:p-8">
+    <h1 className="text-center text-2xl font-bold text-indigo-600 sm:text-3xl">   Espione qualquer
+pessoa apenas
+com o @</h1>
+      <hr />
+
+      <p className="text-center text-lg font-medium">Coloque o @ da pessoa que você quer espionar</p>
+
+      <div>
+        <label htmlFor="email" className="sr-only">Email</label>
+
+        <div className="relative">
+        <input
+          type="search"
+          placeholder="Buscar... (Nome de usuário)"
+          className="w-full p-2 outline-none text-black"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      
+          <span className="absolute inset-y-0 end-0 grid place-content-center px-4">
+          <button
+          className="bg-blue-500 text-white px-4 py-2 hover:bg-blue-600"
+          onClick={handleSearch}
+        >
+          Buscar
+        </button>
+          </span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+      
+
+      <p className="text-center text-sm text-gray-500">
+      <GiPadlock />
+      Dados seguros, a pessoa não saberá que você tentou espionar ela
+      </p>
+    </form>
+  </div>
+</div>
+      <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden w-full max-w-md">
+        
+      </div>
+      <div className="mt-4 w-full max-w-md">
+        {users.length > 0 ? (
+          users.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center p-2 border-b border-gray-200"
+            >
+             <Image
+        src={user.profile_pic_url}
+        alt={user.username}
+        width={48}
+        height={48}
+        className="rounded-full mr-3"
+      />
+               <div>
+                <p className="font-semibold">{user.full_name}</p>
+                <p className="text-gray-500">@{user.username}</p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 text-center mt-4">
+            Nenhum usuário encontrado.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
