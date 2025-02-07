@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
-import GifPadlock from "../app/assets/gifpadlock.gif";
-import Success from "../app/assets/success.gif";
+import DecryptionGif from "../app/assets/gifdecryption.gif";
+import Success from "../app/assets/successblue.gif";
 import GifPadlock2 from "../app/assets/gifpacklock2.gif";
 import noPicture from "../app/assets/picturenone.png";
 import { useState, useEffect } from "react";
@@ -11,6 +11,7 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css"; // Para importar o estilo da barra circular
 
 import VerticalIcons from "../components/VerticalProgress";
+import PreviousContent from "../components/PreviousContent";
 
 interface InstagramUser {
   id: string;
@@ -26,10 +27,11 @@ export default function Home() {
   const [progress, setProgress] = useState(0); // Percentual de progresso
   const [showImage, setShowImage] = useState(false); // Para controlar quando mostrar a imagem
   const [primaryProgress, setPrimaryProgress] = useState(25); // Progresso da barra principal, começa em 25%
+  // Adicione um novo estado para armazenar o nome de usuário encontrado
+  const [username, setUsername] = useState<string | null>(null);
 
   const [decryptionProgress, setDecryptionProgress] = useState(false);
   const [progressDecry, setProgressDecry] = useState(0);
-  
 
   useEffect(() => {
     if (loading) {
@@ -40,14 +42,20 @@ export default function Home() {
           if (prev >= 100) {
             clearInterval(progressInterval);
             setShowImage(true); // Quando atingir 100%, mostra a imagem
-            setPrimaryProgress(50); // Quando a circular chegar a 100%, a barra principal vai para 50%
+            setPrimaryProgress(50);
+            // Quando a circular chegar a 100%, a barra principal vai para 50%
             return 100;
           }
           return prev + 2; // Ajuste para o incremento do progresso
         });
       }, 100); // Atualiza a barra a cada 100ms
     }
-  }, [loading]);
+    console.log(progressDecry);
+    if (progressDecry >= 100) {
+      setPrimaryProgress(95);
+      console.log(progressDecry);
+    }
+  }, [loading, progressDecry]);
 
   const handleSearch = async () => {
     if (!search) return;
@@ -55,6 +63,7 @@ export default function Home() {
     setLoading(true);
     setFirstUser(null);
     setShowImage(false); // Esconde a imagem quando a busca começar
+    setUsername(null);
 
     try {
       const response = await fetch(
@@ -79,7 +88,10 @@ export default function Home() {
           full_name: user.full_name,
           profile_pic_url: user.profile_pic_url,
         });
+        console.log(user);
+        setUsername(user.username);
       }
+      console.log(data);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     } finally {
@@ -97,7 +109,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center  h-screen bg-[#171531]">
+    <div className="flex flex-col items-center h-screen bg-[#171531]">
       <div className=" w-full max-w-md  my-10 space-y-5">
         <div className="relative w-full max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
           <div
@@ -111,35 +123,31 @@ export default function Home() {
             Logo
           </h1>
         )}
-        {decryptionProgress && (
-        <div>
-           {progressDecry < 100 && (
-            <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
-   <Image
-              src={GifPadlock2}
-              alt="Loading..."
-              className="w-60 h-44 scale-100 -mt-0 object-cover "
-            />
-            </div>
-
-          ) }
-          {progressDecry === 100 && (
-            <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
- <Image
-            src={Success}
-            alt="Loading..."
-            className="w-72 h-72 -mt-16 scale-150 object-cover transition-opacity duration-500"
-          />
-            </div>
-
-          ) }
-         
-        </div>
-      )}
+        {decryptionProgress && progressDecry < 100 && (
+          <div className="py-6">
+            {progressDecry < 80 && (
+              <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
+                <Image
+                  src={DecryptionGif}
+                  alt="Loading..."
+                  className="w-60 h-44 scale-100 -mt-0 object-cover "
+                />
+              </div>
+            )}
+            {progressDecry > 80 && progressDecry < 99 && (
+              <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
+                <Image
+                  src={Success}
+                  alt="Loading..."
+                  className="w-52 h-52 -mt-6 scale-110 object-cover transition-opacity duration-500 "
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
-
-      <div className="w-full max-w-md p-6 bg-[#232048] rounded-lg shadow-lg">
-        {!firstUser ? (
+      {!firstUser ? (
+        <div className="w-full max-w-md p-6 bg-[#232048] rounded-lg shadow-lg">
           <div className="mt-6 space-y-8 p-6 rounded-lg bg-[#232048]">
             <h1 className="text-center text-2xl font-semibold text-white sm:text-3xl">
               Espione <span className="text-blue-500">qualquer pessoa</span>{" "}
@@ -178,94 +186,105 @@ export default function Home() {
               </span>
             </span>
           </div>
-        ) : (
-          <div>
-            {!decryptionProgress ? (
-              <div>
-                <div className="flex flex-col items-center p-6 rounded-lg bg-[#232048]">
-                  <h2 className="text-white text-xl font-semibold">
-                    Resultado:
-                  </h2>
-                  <div className="relative w-[120px] h-[120px]">
-                    <CircularProgressbar
-                      value={progress}
-                      strokeWidth={3}
-                      styles={buildStyles({
-                        pathColor: "#ffffff", // Cor da barra
-                        textColor: "#fff", // Cor do texto (percentual)
-                        trailColor: "#3e3e3e", // Cor do fundo
-                      })}
-                    />
-                    {progress < 100 ? (
-                      <div className="text-white font-semibold text-xl flex flex-col text-center">
-                        <Image
-                          src={noPicture}
-                          alt={firstUser.username}
-                          width={110}
-                          height={110}
-                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <Image
-                          src={firstUser.profile_pic_url}
-                          alt={firstUser.username}
-                          width={110}
-                          height={110}
-                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  {progress < 100 && (
+        </div>
+      ) : (
+        <div>
+          {!decryptionProgress ? (
+            <div>
+              <div className="flex flex-col items-center p-6 rounded-lg bg-[#232048]">
+                <h2 className="text-white text-xl font-semibold">Resultado:</h2>
+                <div className="relative w-[120px] h-[120px]">
+                  <CircularProgressbar
+                    value={progress}
+                    strokeWidth={3}
+                    styles={buildStyles({
+                      pathColor: "#ffffff", // Cor da barra
+                      textColor: "#fff", // Cor do texto (percentual)
+                      trailColor: "#3e3e3e", // Cor do fundo
+                    })}
+                  />
+                  {progress < 100 ? (
                     <div className="text-white font-semibold text-xl flex flex-col text-center">
-                      <h1 className="text-3xl my-2">Analisando...</h1>
-
-                      <h2 className="px-0 flex">
-                        {" "}
-                        Nosso sistema está procurando falhas segurança nessa
-                        conta para achar uma brecha
-                      </h2>
+                      <Image
+                        src={noPicture}
+                        alt={firstUser.username}
+                        width={110}
+                        height={110}
+                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      />
                     </div>
-                  )}
-                  {progress === 100 && (
-                    <>
-                      <p className="text-white text-lg font-medium">
-                        {firstUser.full_name}
-                      </p>
-                      <p className="text-gray-400">@{firstUser.username}</p>
-                    </>
-                  )}
-                  {progress === 100 && (
-                    <div className="mt-4 flex flex-col space-y-4 text-center">
-                      <h1 className=" text-white font-normal text-xl px-4 py-2 ">
-                        Podemos prosseguir ?
-                      </h1>
-                      <button
-                        className="bg-cyan-600 text-white font-semibold text-xl px-8 py-2 rounded-lg hover:bg-cyan-700"
-                        onClick={() => setDecryptionProgress(true)}
-                      >
-                        Continuar, o perfil está correto
-                      </button>
-                      <button
-                        className=" text-white font-semibold px-4 py-2 rounded-lg hover:text-slate-400"
-                        onClick={() => setFirstUser(null)}
-                      >
-                        Não, quero corrigir
-                      </button>
+                  ) : (
+                    <div>
+                      <Image
+                        src={firstUser.profile_pic_url}
+                        alt={firstUser.username}
+                        width={110}
+                        height={110}
+                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      />
                     </div>
                   )}
                 </div>
+                {progress < 100 && (
+                  <div className="text-white font-semibold text-xl w-2/3 flex flex-col text-center">
+                    <h1 className="text-3xl my-2">Analisando...</h1>
+
+                    <h2 className="px-0 flex">
+                      {" "}
+                      Nosso sistema está procurando falhas segurança nessa conta
+                      para achar uma brecha
+                    </h2>
+                  </div>
+                )}
+                {progress === 100 && (
+                  <>
+                    <p className="text-white text-lg font-medium">
+                      {firstUser.full_name}
+                    </p>
+                    <p className="text-gray-400">@{firstUser.username}</p>
+                  </>
+                )}
+                {progress === 100 && (
+                  <div className="mt-4 flex flex-col space-y-4 text-center">
+                    <h1 className=" text-white font-normal text-xl px-4 py-2 ">
+                      Podemos prosseguir ?
+                    </h1>
+                    <button
+                      className="bg-cyan-600 text-white font-semibold text-xl px-8 py-2 rounded-lg hover:bg-cyan-700"
+                      onClick={() => setDecryptionProgress(true)}
+                    >
+                      Continuar, o perfil está correto
+                    </button>
+                    <button
+                      className=" text-white font-semibold px-4 py-2 rounded-lg hover:text-slate-400"
+                      onClick={() => setFirstUser(null)}
+                    >
+                      Não, quero corrigir
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div>
-                <VerticalIcons progress={progressDecry} setProgress={setProgressDecry}/>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          ) : (
+            <div>
+              {progressDecry < 100 ? (
+                <div className="w-full max-w-md p-6 bg-[#232048] rounded-lg shadow-lg">
+                  <div>
+                    <VerticalIcons
+                      progress={progressDecry}
+                      setProgress={setProgressDecry}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {username && <PreviousContent username={username} firstUser={firstUser}  />}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

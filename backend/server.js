@@ -1,7 +1,7 @@
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-const helmet = require('helmet');
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
+const helmet = require("helmet");
 
 const app = express();
 
@@ -9,54 +9,49 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 
-// Endpoint da API
-app.get('/api/user/:username', async (req, res) => {
+// Rota da API para buscar detalhes do usuário do Instagram
+app.get("/api/user/:username", async (req, res) => {
   const username = req.params.username;
+  console.log(`Recebida solicitação para buscar dados do usuário: ${username}`);
 
   try {
-    // Fazendo a requisição usando axios
     const response = await axios.get(
       `https://instagram191.p.rapidapi.com/v4/user-details-by-username?username=${username}`,
       {
         headers: {
-          'X-RapidAPI-Host': 'instagram191.p.rapidapi.com',
-          'X-RapidAPI-Key': 'e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3',
+          "X-RapidAPI-Host": "instagram191.p.rapidapi.com",
+          "X-RapidAPI-Key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
         },
       }
     );
 
-    const data = response.data;
+    console.log("Resposta recebida da API:", response.data);
 
-    if (data && data.data) {
+    if (response.data && response.data.data) {
       res.json({
-        status: 'success',
-        data: data.data,
+        status: "success",
+        data: response.data.data,
       });
     } else {
-      res.json({
-        status: 'error',
-        message: 'Usuário não encontrado ou dados inválidos.',
+      console.warn(`Nenhum dado encontrado para o usuário: ${username}`);
+      res.status(404).json({
+        status: "error",
+        message: "Usuário não encontrado ou dados inválidos.",
       });
     }
   } catch (error) {
-    console.error('Erro ao buscar usuário:', error);
+    console.error("Erro ao buscar usuário:", error.message);
+
+    if (error.response) {
+      console.error("Detalhes do erro:", error.response.data);
+    }
+
     res.status(500).json({
-      status: 'error',
-      message: 'Erro ao buscar usuário.',
+      status: "error",
+      message: "Erro ao buscar usuário.",
     });
   }
 });
-// app.get('/api/proxy-image', async (req, res) => {
-//     const imageUrl = req.query.url;
-    
-//     try {
-//       const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-//       res.set('Content-Type', 'image/jpeg'); // ou o tipo correto de imagem
-//       res.send(imageResponse.data);
-//     } catch (error) {
-//       res.status(500).send('Erro ao carregar a imagem');
-//     }
-//   });
-  
-// Iniciar o servidor
-app.listen(5000, () => console.log('Server running on http://localhost:5000'));
+
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));

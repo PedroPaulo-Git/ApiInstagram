@@ -15,7 +15,7 @@ export default function VerticalProgressBar({ progress,setProgress }) {
         return oldProgress + 1;
       });
     }, 100);
-
+   
     return () => clearInterval(interval);
   }, []);
 
@@ -40,25 +40,25 @@ export default function VerticalProgressBar({ progress,setProgress }) {
         {/* Ícones de correto */}
         <MdOutlineDone 
           className={`absolute left-1/2 transform -translate-x-1/2 bg-[#232048]  text-2xl transition-opacity ${
-            progress > 30 ? "opacity-100 text-cyan-400" : "text-gray-300"
+            progress > 25 ? "opacity-100 text-cyan-400" : "text-gray-300"
           }`}
           style={{ top: "17%" }}
         />
         <MdOutlineDone 
           className={`absolute left-1/2 transform -translate-x-1/2 bg-[#232048] text-2xl font-bold transition-opacity ${
-            progress > 60 ? "opacity-100  text-cyan-400" : "text-gray-300"
+            progress > 50 ? "opacity-100  text-cyan-400" : "text-gray-300"
           }`}
           style={{ top: "44%" }}
         />
         <MdOutlineDone 
           className={`absolute left-1/2 transform -translate-x-1/2 bg-[#232048]  text-2xl font-bold transition-opacity ${
-            progress === 100 ? "opacity-100  text-cyan-400" : "text-gray-300"
+            progress > 70 ? "opacity-100  text-cyan-400" : "text-gray-300"
           }`}
           style={{ top: "69%" }}
         />
          <MdOutlineDone 
           className={`absolute left-1/2 transform -translate-x-1/2 bg-[#232048]  text-2xl font-bold transition-opacity ${
-            progress === 100 ? "opacity-100  text-cyan-400" : "text-gray-300"
+            progress > 95 ? "opacity-100  text-cyan-400" : "text-gray-300"
           }`}
           style={{ top: "95%" }}
         />   </div>
