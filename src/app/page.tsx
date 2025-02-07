@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { GiPadlock } from "react-icons/gi";
 import { IoSearchSharp } from "react-icons/io5";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+
+import LoadingSpinnerSmall from "@/components/LoadingSpinnerSmall";
 import "react-circular-progressbar/dist/styles.css"; // Para importar o estilo da barra circular
 
 import VerticalIcons from "../components/VerticalProgress";
@@ -30,7 +32,6 @@ export default function Home() {
   // Adicione um novo estado para armazenar o nome de usuário encontrado
   const [username, setUsername] = useState<string | null>(null);
   const [usernameId, setUsernameId] = useState<string | null>(null);
-
 
   const [decryptionProgress, setDecryptionProgress] = useState(false);
   const [progressDecry, setProgressDecry] = useState(0);
@@ -92,7 +93,7 @@ export default function Home() {
         });
         console.log(user);
         setUsername(user.username);
-        setUsernameId(user.id)
+        setUsernameId(user.id);
       }
       console.log(data);
     } catch (error) {
@@ -172,11 +173,13 @@ export default function Home() {
                 />
                 <span className="absolute inset-y-0 end-0 grid place-content-center px-3">
                   <button
-                    className="rounded-lg bg-cyan-400 text-black px-4 py-2 hover:bg-cyan-400"
+                    className="rounded-lg bg-cyan-400 text-black px-4 py-2 hover:bg-cyan-400 disabled:opacity-50"
                     onClick={handleSearch}
                     disabled={loading}
                   >
-                    {loading ? "Buscando..." : <IoSearchSharp />}
+                  
+                      {loading ? <LoadingSpinnerSmall /> : <IoSearchSharp />}
+                  
                   </button>
                 </span>
               </div>
@@ -281,7 +284,13 @@ export default function Home() {
                 </div>
               ) : (
                 <div>
-                  {username && firstUser && <PreviousContent username={username}  firstUser={firstUser} id={firstUser.id}  />}
+                  {username && firstUser && (
+                    <PreviousContent
+                      username={username}
+                      firstUser={firstUser}
+                      id={firstUser.id}
+                    />
+                  )}
                 </div>
               )}
             </div>

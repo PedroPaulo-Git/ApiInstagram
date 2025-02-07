@@ -4,7 +4,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.cdninstagram.com', // Permite qualquer subdomínio do Instagram
+        hostname: '**.fbcdn.net', // Permite imagens hospedadas nos servidores do Facebook/Instagram
+      },
+      {
+        protocol: 'https',
+        hostname: '**.cdninstagram.com', // Se precisar carregar imagens deste também
       },
     ],
   },
