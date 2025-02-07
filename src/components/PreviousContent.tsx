@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+
+import Direct from "../app/assets/header-dm.png";
+
 import templateHighlights from "../app/assets/storiesEdited2.png";
 import CloseFriendsStories from "../app/assets/story_1.png";
 import CloseFriendsStories2 from "../app/assets/story_2.png";
@@ -8,6 +11,9 @@ import Map from "../app/assets/map.png";
 import Gallery from "../app/assets/gallery.png";
 import AudioPng from "../app/assets/audio.svg";
 import userBlocked from "../app/assets/blocked-user.svg";
+
+
+
 import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 interface PreviousContentProps {
   username: string;
@@ -38,125 +44,100 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   const [highlights, setHighlights] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
   const [localization, setLocalization] = useState<string>("");
-
-
 
   const carouselRef = useRef<HTMLUListElement>(null);
 
-  const getIpLocation = async () => {
-    try {
-      const response = await fetch("http://ip-api.com/json/");
-      const data = await response.json();
-      const location = data.city || "*****";
-      setLocalization(location);
-    } catch (error) {
-      console.error("Erro ao obter localização pelo IP:", error);
-      setLocalization("*****");
-    }
-  };
-  
-  const fetchLocations = async () => {
-    const ipLocation = await getIpLocation();
-    return { ipLocation };
-  };
- 
-  fetchLocations();
-  
-
-
-
-
-
-  const fetchFollowers = async () => {
-    try {
-      const response = await fetch(
-        `https://instagram-scraper-api2.p.rapidapi.com/v1/followers?username_or_id_or_url=${username}`,
-        {
-          method: "GET",
-          headers: {
-            "x-rapidapi-key":
-              "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
-            "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-          },
-        }
-      );
-
-      const data = await response.json();
-      if (data.data?.items?.length) {
-        setFollowers(
-          data.data.items.slice(0, 10).map((f: any) => ({
-            username: f.username,
-            full_name: f.full_name,
-            profile_pic_url: f.profile_pic_url,
-          }))
-        );
-        setError(null);
-      } else {
-        setError("Nenhum seguidor encontrado.");
+  useEffect(() => {
+    const getIpLocation = async () => {
+      try {
+        const response = await fetch("http://ip-api.com/json/");
+        const data = await response.json();
+        setLocalization(data.city || "*****");
+      } catch (error) {
+        console.error("Erro ao obter localização pelo IP:", error);
+        setLocalization("*****");
       }
-    } catch (error) {
-      setError("Erro ao carregar seguidores.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const fetchHighlights = async () => {
-    try {
-      const response = await fetch(
-        `https://instagram-scraper-api2.p.rapidapi.com/v1/highlights?username_or_id_or_url=${username}`,
-        {
-          method: "GET",
-          headers: {
-            "x-rapidapi-key":
-              "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
-            "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-          },
-        }
-      );
-      const data = await response.json();
+    getIpLocation();
+  }, []);
 
-      if (data.data?.items?.length) {
-        const firstHighlight = data.data.items[0];
-        const formData = new URLSearchParams();
-        formData.append("highlight_id", firstHighlight.id);
-
-        const fetchThumbnail = await fetch(
-          "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const followersResponse = await fetch(
+          `https://instagram-scraper-api2.p.rapidapi.com/v1/followers?username_or_id_or_url=${username}`,
           {
-            method: "POST",
+            method: "GET",
             headers: {
-              "x-rapidapi-key":
-                "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
-              "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
-              "Content-Type": "application/x-www-form-urlencoded",
+              "x-rapidapi-key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+              "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
             },
-            body: formData.toString(),
           }
         );
 
-        const thumbnailData = await fetchThumbnail.json();
-        if (thumbnailData.items?.length) {
-          const thumbnailUrl =
-            thumbnailData.items[0].image_versions2.candidates[0].url;
-          setHighlights([thumbnailUrl]);
+        const followersData = await followersResponse.json();
+        if (followersData.data?.items?.length) {
+          setFollowers(
+            followersData.data.items.slice(0, 10).map((f: any) => ({
+              username: f.username,
+              full_name: f.full_name,
+              profile_pic_url: f.profile_pic_url,
+            }))
+          );
+        } else {
+          setError("Nenhum seguidor encontrado.");
         }
-      } else {
-        setError("Nenhum highlight encontrado.");
+
+        const highlightsResponse = await fetch(
+          `https://instagram-scraper-api2.p.rapidapi.com/v1/highlights?username_or_id_or_url=${username}`,
+          {
+            method: "GET",
+            headers: {
+              "x-rapidapi-key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+              "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
+            },
+          }
+        );
+
+        const highlightsData = await highlightsResponse.json();
+        if (highlightsData.data?.items?.length) {
+          const firstHighlight = highlightsData.data.items[0];
+
+          const formData = new URLSearchParams();
+          formData.append("highlight_id", firstHighlight.id);
+
+          const fetchThumbnail = await fetch(
+            "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
+            {
+              method: "POST",
+              headers: {
+                "x-rapidapi-key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+                "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: formData.toString(),
+            }
+          );
+
+          const thumbnailData = await fetchThumbnail.json();
+          if (thumbnailData.items?.length) {
+            setHighlights([
+              thumbnailData.items[0].image_versions2.candidates[0].url,
+            ]);
+          }
+        } else {
+          setError("Nenhum highlight encontrado.");
+        }
+      } catch (error) {
+        setError("Erro ao carregar dados.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      setError("Erro ao carregar highlights.");
-    }
-  };
+    };
 
-  useEffect(() => {
-    fetchFollowers();
-  }, [username]);
-
-  useEffect(() => {
-    fetchHighlights();
+    fetchData();
   }, [username]);
 
   useEffect(() => {
@@ -173,7 +154,6 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
 
     return () => clearInterval(scrollInterval);
   }, [followers]);
-
   return (
     <div className="max-w-[450px] w-full mx-auto">
       <div className="flex flex-col text-white">
@@ -191,7 +171,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
         {loading ? (
           <p>Carregando seguidores...</p>
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <div></div>
         ) : (
           <div className="relative w-full max-w-md overflow-hidden ">
             <ul
@@ -230,10 +210,32 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
         {loading ? (
           <p className="text-gray-400 text-center mt-5 mb-5">Carregando...</p>
         ) : error ? (
-          <div className="text-center mt-5">
-            <h2 className="text-xl text-red-500">Erro ao carregar os dados</h2>
-            <p className="text-gray-400">Tente novamente mais tarde.</p>
-          </div>
+          <div className="print bg-[#000] rounded-2xl relative h-[240px] mt-[20px] w-full overflow-hidden">
+           <Image
+              src={Direct}
+              className="mb-2 w-full object-contain z-10 rounded-2xl"
+              alt=""
+              draggable="false"
+            />
+            <div className="itens space-x-3 flex items-end absolute z-[4] left-[4%] top-[35%]">
+            <Image
+              src={userBlocked}
+              className="mb-2"
+              alt=""
+              width="30"
+              draggable="false"
+            />
+                <div className="messages select-none pointer-events-none space-y-[3px] pr-[20px] ">
+                  <div className="bg-[#262626] text-[14px] w-fit rounded-tr-3xl rounded-bl-[4px] rounded-br-3xl rounded-tl-3xl px-[14px] py-[8px] text-[#eee]">
+                    <span>ei</span></div><div className="bg-[#262626] text-[14px] w-fit rounded-tr-3xl rounded-tl-[4px] rounded-bl-[4px] rounded-br-3xl  px-[14px] py-[8px] text-[#eee]">
+                      <span>Vai tá em {localization} esses dias?</span>
+                      </div>
+                      <div className="bg-[#262626] text-[14px] w-fit rounded-tr-3xl rounded-tl-[4px] rounded-bl-[4px] rounded-br-3xl  px-[14px] py-[8px] text-[#eee]">
+                        <span>Quero te ver rsrsrsrs</span>
+                        </div>
+                        </div>
+                        </div>
+            </div>
         ) : highlights.length > 0 ? (
           <>
             <h1 className="text-2xl mt-[50px] text-center">
@@ -280,14 +282,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             </div>
           </>
         ) : (
-          <div className="text-center mt-5">
-            <h2 className="text-xl text-gray-500">
-              Nenhuma conversa pessoal encontrada
-            </h2>
-            <p className="text-gray-400">
-              Parece que não há conteúdos detectados.
-            </p>
-          </div>
+          <div className="print bg-[#000] rounded-2xl relative h-[240px] mt-[20px] w-full">
+            </div>
         )}
 
         <h1 className="text-2xl mt-[100px] text-center">
