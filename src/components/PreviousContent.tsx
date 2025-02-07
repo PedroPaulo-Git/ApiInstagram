@@ -2,11 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import templateHighlights from '../app/assets/storiesEdited2.png';
 
+
 interface PreviousContentProps {
   username: string;
   firstUser: FirstUser;
+  id: string;  // Alterado para aceitar o tipo FirstUser
 }
+
 interface FirstUser {
+  id:string;
   username: string;
   full_name: string;
   profile_pic_url: string;
@@ -19,7 +23,7 @@ interface Follower {
   highlights?: string[]; // Adicionando highlights aqui
 }
 
-const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser }) => {
+const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser,id }) => {
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [highlights, setHighlights] = useState<string[]>([]); // Para armazenar highlights
   const [loading, setLoading] = useState(true);
@@ -64,7 +68,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser }
         setLoading(false);
       }
     };
-
+    
     fetchFollowers();
   }, [username]);
 
@@ -83,32 +87,52 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser }
             },
           }
         );
-
+  
         const data = await response.json();
         console.log("Resposta da API (highlights):", data);
-        console.log("finding url", data.data.items[0].cover_media.cropped_image_version.url);
-
+  
         if (data.data?.items?.length > 0) {
-          const firstThumbnail = data.data.items[0].cover_media.cropped_image_version.url;
-          console.log("Primeira thumbnail de highlight encontrada:", firstThumbnail);
-
-          if (firstThumbnail) {
-            setHighlights([firstThumbnail]); // Pegando apenas a primeira thumbnail de highlight
-          } else {
-            // setError("Nenhuma thumbnail encontrada.");
+          const firstHighlight = data.data.items[0]; // Pega o primeiro highlight
+          const firstHighlightId = firstHighlight.id; // ID do primeiro highlight
+          console.log("ID do primeiro highlight:", firstHighlightId);
+  
+          // Agora fazendo o fetch para pegar a imagem com a segunda API
+          const formData = new URLSearchParams();
+          formData.append("highlight_id", firstHighlightId);
+  
+          const fetchThumbnail = await fetch(
+            "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
+            {
+              method: "POST",
+              headers: {
+                "x-rapidapi-key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+                "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: formData.toString(),
+            }
+          );
+  
+          const thumbnailData = await fetchThumbnail.json();
+          console.log("Thumbnail Data:", thumbnailData);
+  
+          if (thumbnailData.items?.length > 0) {
+            const thumbnailUrl = thumbnailData.items[0].image_versions2.candidates[0].url;
+            setHighlights([thumbnailUrl]); // Atualiza a imagem do highlight com a thumbnail
           }
         } else {
-          // setError("Nenhum highlight encontrado.");
+          setError("Nenhum highlight encontrado.");
         }
       } catch (error) {
         console.error("Erro ao buscar highlights:", error);
-        // setError("Erro ao carregar highlights.");
+        setError("Erro ao carregar highlights.");
       }
     };
-
+  
     fetchHighlights();
   }, [username]);
-
+  
+  
   useEffect(() => {
     const scrollInterval = setInterval(() => {
       if (carouselRef.current) {
@@ -126,7 +150,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser }
   }, [followers]);
 
   return (
-    <div className="max-w-[450px] w-full h-screen mx-auto">
+    <div className="max-w-[450px] w-full mx-auto">
       <div className="flex flex-col text-white">
         <h1 className="text-4xl mt-8 text-center font-bold">
           <b className="text-[#5468FF]">Prévia</b> do seu @
@@ -190,13 +214,11 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser }
             <Image
               src={templateHighlights}
               alt="highlights"
-              width={100}
-              height={100}
-              className=" w-96  object-contain"
+              className=" w-96 object-cover"
             />
             {highlights.length > 0 && (
               <div className="absolute top-0" >
-                <p className="text-gray-600 text-xs mt-[70px] mb-2 ml-12">Enviou o highlight de @{username}</p>
+                <p className="text-gray-600 text-xs mt-[70px] mb-2 ml-12">Enviou o stories de @{username}</p>
                 <div className="flex items-center space-x-2 absolute ml-[70px] mt-3">
                   <Image
                     src={firstUser.profile_pic_url} // Exibe a primeira thumbnail corretamente
@@ -212,7 +234,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser }
                   alt="user highlight"
                   width={100}
                   height={100}
-                  className="rounded-xl h-[186px] w-32 top-0 mt-[0px] ml-[63px]"
+                  className="rounded-xl h-[200px] w-32 top-0 mt-[0px] ml-[63px]"
                 />
               </div>
             )}

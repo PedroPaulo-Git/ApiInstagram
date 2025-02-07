@@ -29,6 +29,8 @@ export default function Home() {
   const [primaryProgress, setPrimaryProgress] = useState(25); // Progresso da barra principal, começa em 25%
   // Adicione um novo estado para armazenar o nome de usuário encontrado
   const [username, setUsername] = useState<string | null>(null);
+  const [usernameId, setUsernameId] = useState<string | null>(null);
+
 
   const [decryptionProgress, setDecryptionProgress] = useState(false);
   const [progressDecry, setProgressDecry] = useState(0);
@@ -90,6 +92,7 @@ export default function Home() {
         });
         console.log(user);
         setUsername(user.username);
+        setUsernameId(user.id)
       }
       console.log(data);
     } catch (error) {
@@ -109,7 +112,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center h-screen bg-[#171531]">
+    <div className="flex flex-col items-center bg-[#171531]">
       <div className=" w-full max-w-md  my-10 space-y-5">
         <div className="relative w-full max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
           <div
@@ -278,7 +281,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div>
-                  {username && <PreviousContent username={username} firstUser={firstUser}  />}
+                  {username && firstUser && <PreviousContent username={username}  firstUser={firstUser} id={firstUser.id}  />}
                 </div>
               )}
             </div>
