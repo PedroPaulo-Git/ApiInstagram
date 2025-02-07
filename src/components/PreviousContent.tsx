@@ -1,147 +1,140 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import templateHighlights from '../app/assets/storiesEdited2.png';
-
-
+import templateHighlights from "../app/assets/storiesEdited2.png";
+import CloseFriendsStories from "../app/assets/story_1.png";
+import CloseFriendsStories2 from "../app/assets/story_2.png";
+import Close from "../app/assets/close.png";
+import Map from "../app/assets/map.png";
+import Gallery from "../app/assets/gallery.png";
+import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 interface PreviousContentProps {
   username: string;
   firstUser: FirstUser;
-  id: string;  // Alterado para aceitar o tipo FirstUser
+  id: string;
 }
 
 interface FirstUser {
-  id:string;
+  id: string;
   username: string;
   full_name: string;
   profile_pic_url: string;
-  highlights?: string[]; // Adicionando highlights aqui
+  highlights?: string[];
 }
+
 interface Follower {
   username: string;
   full_name: string;
   profile_pic_url: string;
-  highlights?: string[]; // Adicionando highlights aqui
 }
 
-const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser,id }) => {
+const PreviousContent: React.FC<PreviousContentProps> = ({
+  username,
+  firstUser,
+  id,
+}) => {
   const [followers, setFollowers] = useState<Follower[]>([]);
-  const [highlights, setHighlights] = useState<string[]>([]); // Para armazenar highlights
-  const [loading, setLoading] = useState(true);
+  const [highlights, setHighlights] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const carouselRef = useRef<HTMLUListElement>(null);
 
-  useEffect(() => {
-    const fetchFollowers = async () => {
-      console.log(`Buscando seguidores para: ${username}`);
+  const fetchFollowers = async () => {
+    try {
+      const response = await fetch(
+        `https://instagram-scraper-api2.p.rapidapi.com/v1/followers?username_or_id_or_url=${username}`,
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-key":
+              "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+            "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
+          },
+        }
+      );
 
-      try {
-        const response = await fetch(
-          `https://instagram-scraper-api2.p.rapidapi.com/v1/followers?username_or_id_or_url=${username}`,
+      const data = await response.json();
+      if (data.data?.items?.length) {
+        setFollowers(data.data.items.slice(0, 10).map((f: any) => ({
+          username: f.username,
+          full_name: f.full_name,
+          profile_pic_url: f.profile_pic_url,
+        })));
+        setError(null);
+      } else {
+        setError("Nenhum seguidor encontrado.");
+      }
+    } catch (error) {
+      setError("Erro ao carregar seguidores.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchHighlights = async () => {
+    try {
+      const response = await fetch(
+        `https://instagram-scraper-api2.p.rapidapi.com/v1/highlights?username_or_id_or_url=${username}`,
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-key":
+              "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+            "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
+          },
+        }
+      );
+      const data = await response.json();
+
+      if (data.data?.items?.length) {
+        const firstHighlight = data.data.items[0];
+        const formData = new URLSearchParams();
+        formData.append("highlight_id", firstHighlight.id);
+
+        const fetchThumbnail = await fetch(
+          "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
           {
-            method: "GET",
+            method: "POST",
             headers: {
-              "x-rapidapi-key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
-              "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
+              "x-rapidapi-key":
+                "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+              "x-rapidapi-host":
+                "instagram-scraper-stable-api.p.rapidapi.com",
+              "Content-Type": "application/x-www-form-urlencoded",
             },
+            body: formData.toString(),
           }
         );
 
-        const data = await response.json();
-        console.log("Resposta da API (seguidores):", data);
-
-        if (data.data.items && Array.isArray(data.data.items)) {
-          const followersList = data.data.items.map((follower: any) => ({
-            username: follower.username,
-            full_name: follower.full_name,
-            profile_pic_url: follower.profile_pic_url,
-          }));
-
-          setFollowers(followersList.slice(0, 10));
-          setError(null);
-        } else {
-          setError("Nenhum seguidor encontrado.");
+        const thumbnailData = await fetchThumbnail.json();
+        if (thumbnailData.items?.length) {
+          const thumbnailUrl =
+            thumbnailData.items[0].image_versions2.candidates[0].url;
+          setHighlights([thumbnailUrl]);
         }
-      } catch (error) {
-        console.error("Erro ao buscar seguidores:", error);
-        setError("Erro ao carregar seguidores.");
-      } finally {
-        setLoading(false);
+      } else {
+        setError("Nenhum highlight encontrado.");
       }
-    };
-    
+    } catch (error) {
+      setError("Erro ao carregar highlights.");
+    }
+  };
+
+  useEffect(() => {
     fetchFollowers();
   }, [username]);
 
-  // Fetch de highlights do usuário
   useEffect(() => {
-    const fetchHighlights = async () => {
-      console.log(`Buscando highlights para: ${username}`);
-      try {
-        const response = await fetch(
-          `https://instagram-scraper-api2.p.rapidapi.com/v1/highlights?username_or_id_or_url=${username}`,
-          {
-            method: "GET",
-            headers: {
-              "x-rapidapi-key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
-              "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-            },
-          }
-        );
-  
-        const data = await response.json();
-        console.log("Resposta da API (highlights):", data);
-  
-        if (data.data?.items?.length > 0) {
-          const firstHighlight = data.data.items[0]; // Pega o primeiro highlight
-          const firstHighlightId = firstHighlight.id; // ID do primeiro highlight
-          console.log("ID do primeiro highlight:", firstHighlightId);
-  
-          // Agora fazendo o fetch para pegar a imagem com a segunda API
-          const formData = new URLSearchParams();
-          formData.append("highlight_id", firstHighlightId);
-  
-          const fetchThumbnail = await fetch(
-            "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
-            {
-              method: "POST",
-              headers: {
-                "x-rapidapi-key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
-                "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-              body: formData.toString(),
-            }
-          );
-  
-          const thumbnailData = await fetchThumbnail.json();
-          console.log("Thumbnail Data:", thumbnailData);
-  
-          if (thumbnailData.items?.length > 0) {
-            const thumbnailUrl = thumbnailData.items[0].image_versions2.candidates[0].url;
-            setHighlights([thumbnailUrl]); // Atualiza a imagem do highlight com a thumbnail
-          }
-        } else {
-          setError("Nenhum highlight encontrado.");
-        }
-      } catch (error) {
-        console.error("Erro ao buscar highlights:", error);
-        setError("Erro ao carregar highlights.");
-      }
-    };
-  
     fetchHighlights();
   }, [username]);
-  
-  
+
   useEffect(() => {
     const scrollInterval = setInterval(() => {
       if (carouselRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-
         if (scrollLeft + clientWidth >= scrollWidth) {
           carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
         } else {
-          carouselRef.current.scrollBy({ left: 300, behavior: "smooth" }); // Aumentei para 300px
+          carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
         }
       }
     }, 4000);
@@ -190,7 +183,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser,i
                           "*".repeat(3)}
                       </p>
                       <p className="text-gray-400">
-                        @{"*".repeat(3) +
+                        @
+                        {"*".repeat(3) +
                           follower.username.slice(3, -3) +
                           "*".repeat(3)}
                       </p>
@@ -203,10 +197,12 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser,i
         )}
 
         <h1 className="text-2xl mt-[50px] text-center">
-          Detectamos <b className="text-[#5468FF]">conversas pessoais</b> dessa pessoa
+          Detectamos <b className="text-[#5468FF]">conversas pessoais</b> dessa
+          pessoa
         </h1>
         <p className="text-gray-400 text-center mt-5 mb-5">
-          Nossa inteligência artificial identificou algumas conversas mais pessoais.
+          Nossa inteligência artificial identificou algumas conversas mais
+          pessoais.
         </p>
 
         <div className="flex items-center justify-between mt-10">
@@ -217,8 +213,10 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser,i
               className=" w-96 object-cover"
             />
             {highlights.length > 0 && (
-              <div className="absolute top-0" >
-                <p className="text-gray-600 text-xs mt-[70px] mb-2 ml-12">Enviou o stories de @{username}</p>
+              <div className="absolute top-0">
+                <p className="text-gray-600 text-xs mt-[70px] mb-2 ml-12">
+                  Enviou o stories de @{username}
+                </p>
                 <div className="flex items-center space-x-2 absolute ml-[70px] mt-3">
                   <Image
                     src={firstUser.profile_pic_url} // Exibe a primeira thumbnail corretamente
@@ -227,7 +225,9 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser,i
                     height={100}
                     className="rounded-full min-w-[20px] w-[20px]"
                   />
-                  <span className="text-white font-normal text-[9px]">{username}</span>
+                  <span className="text-white font-normal text-[9px]">
+                    {username}
+                  </span>
                 </div>
                 <Image
                   src={highlights[0]} // Exibe a primeira thumbnail de highlight corretamente
@@ -240,6 +240,122 @@ const PreviousContent: React.FC<PreviousContentProps> = ({ username, firstUser,i
             )}
           </div>
         </div>
+
+        <h1 className="text-2xl mt-[100px] text-center">
+          Detectamos{" "}
+          <b className="text-[#5468FF]">áudios em algumas conversas...</b>
+        </h1>
+        <p className="text-gray-400 text-center mt-1 mb-5">
+          Para desbloquear esses e outros áudios e conversas adquira nossa
+          ferramenta.
+        </p>
+        <p className="text-gray-400 text-center mt-1">
+          Toque no player para escutar.
+        </p>
+        <MediaThemeTailwindAudio
+          style={
+            {
+              "--media-primary-color": "#404040",
+              "--media-secondary-color": "#171717",
+            } as any
+          }
+        >
+          <audio
+            slot="media"
+            src="https://stream.mux.com/fXNzVtmtWuyz00xnSrJg4OJH6PyNo6D02UzmgeKGkP5YQ/low.mp4"
+            playsInline
+          ></audio>
+        </MediaThemeTailwindAudio>
+
+        <h3 className="text-2xl mt-[100px] text-center">
+          Por dentro do <b className="text-[#5468FF]">close friends</b>
+        </h3>
+        <p className="text-gray-400 text-center mt-1">
+          Para desbloquear acesso total do CF da pessoa espionada adquira nosso
+          sistema.
+        </p>
+        <div className="mt-8">
+          <div
+            className="relative w-full max-w-sm pointer-events-none"
+            role="region"
+            aria-roledescription="carousel"
+          >
+            <div className="flex gap-4 relative ">
+           
+              <Image
+                src={CloseFriendsStories} // Exibe a primeira thumbnail corretamente
+                alt="user highlight"
+                width={100}
+                height={100}
+                className="rounded-sm w-[220px] h-[320px] "
+              />
+              <div className="flex items-center absolute  mt-3">
+                <Image
+                  src={firstUser.profile_pic_url} // Exibe a primeira thumbnail corretamente
+                  alt="user highlight"
+                  width={100}
+                  height={100}
+                  className="rounded-full mr-2 border-2 border-green-500 ml-3 min-w-[32px] w-[30px]"
+                />
+                <span className="text-white font-normal text-[11px] -mr-2">
+                  {username}
+                </span>
+                <Image
+                  src={Close}
+                  alt="user highlight"
+                  width={100}
+                  height={100}
+                  className="-mr-[200px] min-w-[80px] w-[30px]"
+                />
+              </div>
+
+              <Image
+                src={CloseFriendsStories2} // Exibe a primeira thumbnail corretamente
+                alt="user highlight"
+                width={100}
+                height={100}
+                className="rounded-xl w-[220px] h-[320px]"
+              />
+              <div className="flex items-center -mr-3 absolute right-0 mt-3">
+                <Image
+                  src={firstUser.profile_pic_url} // Exibe a primeira thumbnail corretamente
+                  alt="user highlight"
+                  width={100}
+                  height={100}
+                  className="rounded-full mr-2 ml-40 border-2 border-green-500 min-w-[32px] w-[30px]"
+                />
+                <span className="text-white font-normal text-[11px] -mr-2">
+                  {username}
+                </span>
+                <Image
+                  src={Close}
+                  alt="user highlight"
+                  width={100}
+                  height={100}
+                  className="min-w-[80px] w-[30px]"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 className="text-2xl mt-[100px] mb-3 text-center">Tenha acesso em <b className="text-[#5468FF]">TEMPO REAL</b> a localização do dispositivo da pessoa.</h3>
+        <Image
+                  src={Map}
+                  alt="user highlight"
+                  width={100}
+                  height={100}
+                  className="w-full mb-8"
+                /> 
+          <h3 className="text-2xl mt-[100px] mb-3 text-center">Alguns arquivos de mídia como <b className="text-[#5468FF]">fotos e vídeos</b> foram encontrados em algumas conversas.</h3>
+          <Image
+                  src={Gallery}
+                  alt="user highlight"
+                  width={100}
+                  height={100}
+                  className="w-full mb-4"
+                /> 
+                <button className=" mb-40 bg-[#5266FF] p-6 text-xl font-semibold rounded-xl inline-flex items-center justify-center "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-eye mr-3 size-6"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver relatório completo</button>
       </div>
     </div>
   );

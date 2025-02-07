@@ -112,7 +112,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center bg-[#171531]">
+    <div className="flex flex-col items-center h-svh bg-[#171531]">
       <div className=" w-full max-w-md  my-10 space-y-5">
         <div className="relative w-full max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
           <div
