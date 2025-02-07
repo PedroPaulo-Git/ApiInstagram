@@ -6,6 +6,8 @@ import CloseFriendsStories2 from "../app/assets/story_2.png";
 import Close from "../app/assets/close.png";
 import Map from "../app/assets/map.png";
 import Gallery from "../app/assets/gallery.png";
+import AudioPng from "../app/assets/audio.svg";
+import userBlocked from "../app/assets/blocked-user.svg";
 import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 interface PreviousContentProps {
   username: string;
@@ -36,7 +38,36 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   const [highlights, setHighlights] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [localization, setLocalization] = useState<string>("");
+
+
+
   const carouselRef = useRef<HTMLUListElement>(null);
+
+  const getIpLocation = async () => {
+    try {
+      const response = await fetch("http://ip-api.com/json/");
+      const data = await response.json();
+      const location = data.city || "*****";
+      setLocalization(location);
+    } catch (error) {
+      console.error("Erro ao obter localização pelo IP:", error);
+      setLocalization("*****");
+    }
+  };
+  
+  const fetchLocations = async () => {
+    const ipLocation = await getIpLocation();
+    return { ipLocation };
+  };
+ 
+  fetchLocations();
+  
+
+
+
+
 
   const fetchFollowers = async () => {
     try {
@@ -54,11 +85,13 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
 
       const data = await response.json();
       if (data.data?.items?.length) {
-        setFollowers(data.data.items.slice(0, 10).map((f: any) => ({
-          username: f.username,
-          full_name: f.full_name,
-          profile_pic_url: f.profile_pic_url,
-        })));
+        setFollowers(
+          data.data.items.slice(0, 10).map((f: any) => ({
+            username: f.username,
+            full_name: f.full_name,
+            profile_pic_url: f.profile_pic_url,
+          }))
+        );
         setError(null);
       } else {
         setError("Nenhum seguidor encontrado.");
@@ -97,8 +130,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             headers: {
               "x-rapidapi-key":
                 "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
-              "x-rapidapi-host":
-                "instagram-scraper-stable-api.p.rapidapi.com",
+              "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
               "Content-Type": "application/x-www-form-urlencoded",
             },
             body: formData.toString(),
@@ -195,51 +227,68 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             </ul>
           </div>
         )}
+        {loading ? (
+          <p className="text-gray-400 text-center mt-5 mb-5">Carregando...</p>
+        ) : error ? (
+          <div className="text-center mt-5">
+            <h2 className="text-xl text-red-500">Erro ao carregar os dados</h2>
+            <p className="text-gray-400">Tente novamente mais tarde.</p>
+          </div>
+        ) : highlights.length > 0 ? (
+          <>
+            <h1 className="text-2xl mt-[50px] text-center">
+              Detectamos <b className="text-[#5468FF]">conversas pessoais</b>{" "}
+              dessa pessoa
+            </h1>
+            <p className="text-gray-400 text-center mt-5 mb-5">
+              Nossa inteligência artificial identificou algumas conversas mais
+              pessoais.
+            </p>
 
-        <h1 className="text-2xl mt-[50px] text-center">
-          Detectamos <b className="text-[#5468FF]">conversas pessoais</b> dessa
-          pessoa
-        </h1>
-        <p className="text-gray-400 text-center mt-5 mb-5">
-          Nossa inteligência artificial identificou algumas conversas mais
-          pessoais.
-        </p>
-
-        <div className="flex items-center justify-between mt-10">
-          <div className="h-80 relative mx-auto ">
-            <Image
-              src={templateHighlights}
-              alt="highlights"
-              className=" w-96 object-cover"
-            />
-            {highlights.length > 0 && (
-              <div className="absolute top-0">
-                <p className="text-gray-600 text-xs mt-[70px] mb-2 ml-12">
-                  Enviou o stories de @{username}
-                </p>
-                <div className="flex items-center space-x-2 absolute ml-[70px] mt-3">
+            <div className="flex items-center justify-between mt-10">
+              <div className="h-80 relative mx-auto ">
+                <Image
+                  src={templateHighlights}
+                  alt="highlights"
+                  className="w-96 object-cover"
+                />
+                <div className="absolute top-0">
+                  <p className="text-gray-600 text-xs mt-[70px] mb-2 ml-12">
+                    Enviou o stories de @{username}
+                  </p>
+                  <div className="flex items-center space-x-2 absolute ml-[70px] mt-3">
+                    <Image
+                      src={firstUser.profile_pic_url}
+                      alt="user highlight"
+                      width={100}
+                      height={100}
+                      className="rounded-full min-w-[20px] w-[20px]"
+                    />
+                    <span className="text-white font-normal text-[9px]">
+                      {username}
+                    </span>
+                  </div>
                   <Image
-                    src={firstUser.profile_pic_url} // Exibe a primeira thumbnail corretamente
+                    src={highlights[0]}
                     alt="user highlight"
                     width={100}
                     height={100}
-                    className="rounded-full min-w-[20px] w-[20px]"
+                    className="rounded-xl h-[200px] w-32 top-0 mt-[0px] ml-[63px]"
                   />
-                  <span className="text-white font-normal text-[9px]">
-                    {username}
-                  </span>
                 </div>
-                <Image
-                  src={highlights[0]} // Exibe a primeira thumbnail de highlight corretamente
-                  alt="user highlight"
-                  width={100}
-                  height={100}
-                  className="rounded-xl h-[200px] w-32 top-0 mt-[0px] ml-[63px]"
-                />
               </div>
-            )}
+            </div>
+          </>
+        ) : (
+          <div className="text-center mt-5">
+            <h2 className="text-xl text-gray-500">
+              Nenhuma conversa pessoal encontrada
+            </h2>
+            <p className="text-gray-400">
+              Parece que não há conteúdos detectados.
+            </p>
           </div>
-        </div>
+        )}
 
         <h1 className="text-2xl mt-[100px] text-center">
           Detectamos{" "}
@@ -249,6 +298,49 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
           Para desbloquear esses e outros áudios e conversas adquira nossa
           ferramenta.
         </p>
+
+        <div className="print bg-[#000] rounded-2xl relative h-[180px] mt-[20px] w-full mx-3">
+          <div className="itens space-x-3 flex items-end absolute z-[4] left-[4%] top-[5%]">
+            <Image
+              src={userBlocked}
+              className="mb-2"
+              alt=""
+              width="30"
+              draggable="false"
+            />
+            <div className="messages select-none pointer-events-none space-y-[3px] pr-[20px] ">
+              <div className="bg-[#262626] text-[14px] w-fit overflow-clip rounded-tr-3xl rounded-bl-3xl rounded-br-3xl rounded-tl-[4px] px-[14px] py-[8px] text-[#eee]">
+                <Image src={AudioPng} alt="" width="200" draggable="false" />
+              </div>
+            </div>
+          </div>
+          <div className="itens w-full space-x-3 flex items-end absolute z-[4] right-[2%] top-[14%] mt-10 flex-row-reverse ">
+          {/* <Image
+              src={userBlocked}
+              className="mb-2"
+              alt=""
+              width="30"
+              draggable="false"
+            /> */}
+            <div className="messages select-none pointer-events-none space-y-[3px] pr-[10px] ">
+              <div className="bg-[#3B67EA] text-[14px] w-fit overflow-clip rounded-tl-3xl rounded-br-[4px] rounded-bl-3xl rounded-tr-[4px] px-[14px] py-[8px] text-[#eee]">
+                <Image src={AudioPng} alt="" width="200" draggable="false" />
+              </div>
+              <div className="w-full flex justify-end">
+                <div className="bg-[#3B67EA] text-[14px] w-fit overflow-clip rounded-tl-3xl rounded-br-3xl rounded-bl-3xl rounded-tr-[4px] px-[14px] py-[8px] text-[#eee]">
+                  Foi em {localization} viu kkkkk 
+                </div>
+               
+              </div>
+              
+            </div>
+           
+          </div>
+        </div>
+        <h3 className="text-2xl mt-[100px] mb-3 text-center">
+          Escute agora o <b className="text-[#5468FF]">áudio</b> que a pessoa
+          que você quer espionar recebeu:
+        </h3>
         <p className="text-gray-400 text-center mt-1">
           Toque no player para escutar.
         </p>
@@ -281,13 +373,12 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             aria-roledescription="carousel"
           >
             <div className="flex gap-4 relative ">
-           
               <Image
                 src={CloseFriendsStories} // Exibe a primeira thumbnail corretamente
                 alt="user highlight"
-                width={100}
-                height={100}
-                className="rounded-sm w-[220px] h-[320px] "
+               
+             
+                className="rounded-xl w-[220px] h-[320px] "
               />
               <div className="flex items-center absolute  mt-3">
                 <Image
@@ -295,7 +386,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                   alt="user highlight"
                   width={100}
                   height={100}
-                  className="rounded-full mr-2 border-2 border-green-500 ml-3 min-w-[32px] w-[30px]"
+                  className="rounded-full mr-2 border-2  p-[1px] border-green-500 ml-3 min-w-[32px] w-[30px]"
                 />
                 <span className="text-white font-normal text-[11px] -mr-2">
                   {username}
@@ -312,8 +403,6 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
               <Image
                 src={CloseFriendsStories2} // Exibe a primeira thumbnail corretamente
                 alt="user highlight"
-                width={100}
-                height={100}
                 className="rounded-xl w-[220px] h-[320px]"
               />
               <div className="flex items-center -mr-3 absolute right-0 mt-3">
@@ -322,7 +411,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                   alt="user highlight"
                   width={100}
                   height={100}
-                  className="rounded-full mr-2 ml-40 border-2 border-green-500 min-w-[32px] w-[30px]"
+                  className="rounded-full mr-2 ml-40 p-[1px] border-2 border-green-500 min-w-[32px] w-[30px]"
                 />
                 <span className="text-white font-normal text-[11px] -mr-2">
                   {username}
@@ -339,23 +428,43 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
           </div>
         </div>
 
-        <h3 className="text-2xl mt-[100px] mb-3 text-center">Tenha acesso em <b className="text-[#5468FF]">TEMPO REAL</b> a localização do dispositivo da pessoa.</h3>
+        <h3 className="text-2xl mt-[100px] mb-3 text-center">
+          Tenha acesso em <b className="text-[#5468FF]">TEMPO REAL</b> a
+          localização do dispositivo da pessoa.
+        </h3>
         <Image
-                  src={Map}
-                  alt="user highlight"
-                  width={100}
-                  height={100}
-                  className="w-full mb-8"
-                /> 
-          <h3 className="text-2xl mt-[100px] mb-3 text-center">Alguns arquivos de mídia como <b className="text-[#5468FF]">fotos e vídeos</b> foram encontrados em algumas conversas.</h3>
-          <Image
-                  src={Gallery}
-                  alt="user highlight"
-                  width={100}
-                  height={100}
-                  className="w-full mb-4"
-                /> 
-                <button className=" mb-40 bg-[#5266FF] p-6 text-xl font-semibold rounded-xl inline-flex items-center justify-center "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-eye mr-3 size-6"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver relatório completo</button>
+          src={Map}
+          alt="user highlight"
+          className="w-full mb-8"
+        />
+        <h3 className="text-2xl mt-[100px] mb-3 text-center">
+          Alguns arquivos de mídia como{" "}
+          <b className="text-[#5468FF]">fotos e vídeos</b> foram encontrados em
+          algumas conversas.
+        </h3>
+        <Image
+          src={Gallery}
+          alt="user highlight"
+          className="w-full mb-4"
+        />
+        <button className=" mb-40 bg-[#5266FF] p-6 text-xl font-semibold rounded-xl inline-flex items-center justify-center ">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="lucide lucide-eye mr-3 size-6"
+          >
+            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>{" "}
+          Ver relatório completo
+        </button>
       </div>
     </div>
   );
