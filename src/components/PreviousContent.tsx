@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import Direct from "../app/assets/header-dm.png";
+import userDirect from "../app/assets/profile-m.png";
 
 import templateHighlights from "../app/assets/storiesEdited2.png";
 import CloseFriendsStories from "../app/assets/story_1.png";
@@ -11,6 +12,7 @@ import Map from "../app/assets/map.png";
 import Gallery from "../app/assets/gallery.png";
 import AudioPng from "../app/assets/audio.svg";
 import userBlocked from "../app/assets/blocked-user.svg";
+
 
 
 
@@ -219,7 +221,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             />
             <div className="itens space-x-3 flex items-end absolute z-[4] left-[4%] top-[35%]">
             <Image
-              src={userBlocked}
+              src={userDirect}
               className="mb-2"
               alt=""
               width="30"
@@ -282,7 +284,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             </div>
           </>
         ) : (
-          <div className="print bg-[#000] rounded-2xl relative h-[240px] mt-[20px] w-full">
+          <div>
             </div>
         )}
 
