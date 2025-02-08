@@ -115,9 +115,9 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center max-w-[450px] w-full px-8 mx-auto h-svh bg-[#171531] ">
       <div className=" w-full max-w-md  my-10 space-y-5">
-        <div className="relative w-[80%] max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
+        <div className="relative w-full max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
           <div
-            className="h-2 bg-cyan-400 rounded-full transition-all duration-500"
+            className="h-2 bg-[#00D9CD] rounded-full transition-all duration-500"
             style={{ width: `${primaryProgress}%` }} // Barra principal
           ></div>
         </div>
@@ -129,7 +129,7 @@ export default function Home() {
         )}
         {decryptionProgress && progressDecry < 100 && (
           <div className="py-6">
-            {progressDecry < 80 && (
+            {progressDecry < 60 && (
               <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
                 <Image
                   src={DecryptionGif}
@@ -138,7 +138,7 @@ export default function Home() {
                 />
               </div>
             )}
-            {progressDecry > 80 && progressDecry < 99 && (
+            {progressDecry > 60 && progressDecry < 99 && (
               <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
                 <Image
                   src={Success}
@@ -151,7 +151,7 @@ export default function Home() {
         )}
       </div>
       {!firstUser ? (
-        <div className="w-full max-w-md p-6 bg-[#232048] rounded-lg shadow-lg">
+        <div className="w-full max-w-md bg-[#232048] rounded-lg shadow-lg">
           <div className="mt-6 space-y-8 p-6 rounded-lg bg-[#232048]">
             <h1 className="text-center text-2xl font-semibold text-white sm:text-3xl">
               Espione <span className="text-blue-500">qualquer pessoa</span>{" "}
@@ -167,9 +167,10 @@ export default function Home() {
                 <input
                   type="search"
                   placeholder="Ex.: neymarjr"
-                  className="rounded-xl w-full p-3 outline-none text-white bg-[#232048] border border-cyan-400"
+                  className="rounded-xl w-full p-3 pr-16 outline-none text-white bg-[#232048] border border-cyan-400"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 />
                 <span className="absolute inset-y-0 end-0 grid place-content-center px-3">
                   <button
@@ -178,7 +179,7 @@ export default function Home() {
                     disabled={loading}
                   >
                   
-                      {loading ? <LoadingSpinnerSmall /> : <IoSearchSharp />}
+                      {loading ? <LoadingSpinnerSmall /> : <IoSearchSharp  />}
                   
                   </button>
                 </span>
@@ -198,8 +199,8 @@ export default function Home() {
           {!decryptionProgress ? (
             <div>
               <div className="flex flex-col items-center p-6 rounded-lg bg-[#232048]">
-                <h2 className="text-white text-xl font-semibold">Resultado:</h2>
-                <div className="relative w-[120px] h-[120px]">
+             
+                <div className="relative w-[120px] h-[120px] mb-4">
                   <CircularProgressbar
                     value={progress}
                     strokeWidth={3}
@@ -232,13 +233,13 @@ export default function Home() {
                   )}
                 </div>
                 {progress < 100 && (
-                  <div className="text-white font-semibold text-xl w-2/3 flex flex-col text-center">
-                    <h1 className="text-3xl my-2">Analisando...</h1>
+                  <div className="text-white font-semibold text-lg w-full flex flex-col text-center">
+                    <h1 className="text-2xl my-2">Analisando...</h1>
 
                     <h2 className="px-0 flex">
                       {" "}
                       Nosso sistema está procurando falhas segurança nessa conta
-                      para achar uma brecha
+                      para achar uma brecha.
                     </h2>
                   </div>
                 )}
@@ -248,33 +249,33 @@ export default function Home() {
                       {firstUser.full_name}
                     </p>
                     <p className="text-gray-400">@{firstUser.username}</p>
-                  </>
-                )}
-                {progress === 100 && (
+                
+            
                   <div className="mt-4 flex flex-col space-y-4 text-center">
-                    <h1 className=" text-white font-normal text-xl px-4 py-2 ">
+                    <h1 className=" text-white font-normal text-lg px-4 py-2 ">
                       Podemos prosseguir ?
                     </h1>
                     <button
-                      className="bg-cyan-600 text-white font-semibold text-xl px-8 py-2 rounded-lg hover:bg-cyan-700"
+                      className="bg-cyan-600 text-white font-semibold text-md px-4 py-2 rounded-lg hover:bg-cyan-700"
                       onClick={() => setDecryptionProgress(true)}
                     >
                       Continuar, o perfil está correto
                     </button>
                     <button
-                      className=" text-white font-semibold px-4 py-2 rounded-lg hover:text-slate-400"
+                      className=" text-white font-semibold px-4 py-2 rounded-lg text-sm"
                       onClick={() => setFirstUser(null)}
                     >
                       Não, quero corrigir
                     </button>
-                  </div>
+                  </div> 
+                   </>
                 )}
               </div>
             </div>
           ) : (
             <div>
               {progressDecry < 100 ? (
-                <div className="w-full max-w-md p-6 bg-[#232048] rounded-lg shadow-lg">
+                <div className="w-full max-w-md p-6 px-2 sm:px-6 bg-[#232048] rounded-lg shadow-lg">
                   <div>
                     <VerticalIcons
                       progress={progressDecry}

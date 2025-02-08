@@ -104,8 +104,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             {
               method: "GET",
               headers: {
-                // "x-rapidapi-key":
-                //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+                "x-rapidapi-key":
+                  "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
                 "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
               },
             }
@@ -144,13 +144,13 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                 "Content-Type": "application/x-www-form-urlencoded",
                 "x-rapidapi-host":
                   "instagram-scraper-stable-api.p.rapidapi.com",
-                // "x-rapidapi-key":
-                //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff", // Use a chave de teste, se for o caso
+                "x-rapidapi-key":
+                  "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff", // Use a chave de teste, se for o caso
               },
               body: `username_or_url=https://www.instagram.com/${username}/`,
             }
           );
-          await delay(3000); // Aumenta o delay para reduzir o risco de 429
+          await delay(1000); // Aumenta o delay para reduzir o risco de 429
           const highlightsData = await highlightsResponse.json();
           console.log(
             "Dados de highlights (get_ig_user_highlights.php):",
@@ -171,8 +171,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
               {
                 method: "POST", // Alterado de GET para POST
                 headers: {
-                  // "x-rapidapi-key":
-                  //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+                  "x-rapidapi-key":
+                    "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
                   "x-rapidapi-host":
                     "instagram-scraper-stable-api.p.rapidapi.com",
                   "Content-Type": "application/x-www-form-urlencoded",
@@ -180,7 +180,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                 body: `highlight_id=${encodeURIComponent(highlightId)}`, // Enviando somente o número
               }
             );
-            await delay(3000);
+            await delay(100);
             const thumbnailData = await fetchThumbnail.json();
             console.log("Thumbnail Data:", thumbnailData);
             if (thumbnailData.items?.length > 0) {
@@ -222,11 +222,11 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   return (
     <div className=" w-full mx-auto">
       {!congratulation ? (
-        <div className="flex flex-col max-w-[450px]  text-white pl-16 pr-10 lg:pl-0 lg:pr-0 ">
+        <div className="flex flex-col max-w-[450px]  text-white  lg:pl-0 lg:pr-0 ">
           <h1 className="text-4xl mt-8 text-center font-bold">
             <b className="text-[#5468FF]">Prévia</b> do seu @
           </h1>
-          <div className="items-center w-1/2 mx-auto rounded font-bold text-center bg-[#272445] p-5 mt-5">
+          <div className="items-center px-6 mx-auto rounded font-bold text-center bg-[#272445] p-5 mt-5">
             Prévia disponível
             <br /> por <b className="text-[#FF5489]">apenas 24h</b>
           </div>
@@ -235,13 +235,13 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
           </h3>
 
           {loading ? (
-            <div>
+            <div className="mx-auto mt-8">
               <LoadingSpinner />
             </div>
           ) : followersError ? (
             <div></div>
           ) : (
-            <div className="relative w-full max-w-md overflow-hidden ">
+            <div className="relative w-full max-w-[300px] mx-auto overflow-hidden ">
               <ul
                 ref={carouselRef}
                 className="mt-4 text-black flex space-x-10 items-center overflow-x-scroll no-scrollbar scroll-smooth snap-x snap-mandatory"
@@ -441,11 +441,11 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
           </p>
           <div className="mt-8 ">
             <div
-              className="relative w-full mx-auto max-w-sm pointer-events-none"
+              className="relative mx-auto   pointer-events-none"
               role="region"
               aria-roledescription="carousel"
             >
-              <div className="flex gap-4 relative ">
+              <div className="flex  gap-4 relative overflow-hidden ">
                 <div className="flex items-center  absolute w-[150px] mt-3">
                   <Image
                     src={firstUser.profile_pic_url} // Exibe a primeira thumbnail corretamente

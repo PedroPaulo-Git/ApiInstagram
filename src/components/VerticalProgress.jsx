@@ -21,11 +21,11 @@ export default function VerticalProgressBar({ progress,setProgress }) {
 
   return (
     <div className="flex flex-col space-y-2 text-center justify-center">
-        <div className="flex space-x-8 ">
+        <div className="flex space-x-7 ">
 
        
         <LoadingSpinner className=""/> 
-        <h1 className="font-semibold text-lg text-cyan-500 mt-1"> Descriptografando informações...</h1>
+        <h1 className="font-semibold text-lg text-left  text-cyan-500 mt-1"> Descriptografando informações...</h1>
         </div>
         <div className="w-full flex">
             
