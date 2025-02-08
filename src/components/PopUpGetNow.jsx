@@ -1,24 +1,35 @@
-import React from 'react'
+import React,{useEffect} from 'react'
 
-const PopUpGetNow = ({showPopUpCongratulation,setShowPopUpCongratulation}) => {
+const PopUpGetNow = ({showPopUpCongratulation,setShowPopUpCongratulation,username}) => {
+  useEffect(() => {
+    if (showPopUpCongratulation) {
+      document.body.style.overflow = "hidden"; // Impede o scroll
+    } else {
+      document.body.style.overflow = "auto"; // Restaura o scroll
+    }
+
+    return () => {
+      document.body.style.overflow = "auto"; // Garante que o scroll volte ao normal ao desmontar o componente
+    };
+  }, [showPopUpCongratulation]);
   return (
     <div>
-        {/* <div class="flex flex-col items-center pr-3 pl-3 pb-[100px]" 
+        {/* <div className="flex flex-col items-center pr-3 pl-3 pb-[100px]" 
         ></div>
       */}
-        <div class="fixed text-gray-600  inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 shadow-lg w-96 text-center">
-        <p class="mb-6">Você enviou solicitação de relatório do perfil <b>@ret</b>.</p>
-        <p class="p-2 bg-[#344356] rounded-2xl text-white">Se você sair dessa página você corre o risco do investigado ser notificado.</p>
-        <p class="mt-5">Tenha acesso completo e veja tudo em tempo real</p>
-        <button
-          
-            className="bg-[#5266FF] p-6 text-white text-xl font-semibold w-full mt-4 rounded-xl inline-flex items-center justify-center "
+        <div className="fixed text-gray-600  inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 shadow-lg w-96 text-center">
+        <p className="mb-6">Você enviou solicitação de relatório do perfil <b>@{username}</b>.</p>
+        <p className="p-2 bg-[#344356] rounded-2xl text-white">Se você sair dessa página você corre o risco do investigado ser notificado.</p>
+        <p className="mt-5">Tenha acesso completo e veja tudo em tempo real</p>
+        <a
+            class=" z-20 text-white mt-4 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-semibold flex bg-primary rounded-2xl w-full justify-center items-center"
+            href="https://checkout.perfectpay.com.br/pay/PPU38CP8I9K?utm_source=FB&utm_campaign=%F0%9F%9F%A3+BM+7+C2++-+%5BABO%5D+%5BDARKPOST%5D+%5BIG+8%5D%7C120214815490410124&utm_medium=VAL+3+-+1+6%7C120215179470900124&utm_content=V1+1+6%7C120215179477180124&utm_term=Instagram_Reels&xcod=FBhQwK21wXxR%F0%9F%9F%A3+BM+7+C2++-+%5BABO%5D+%5BDARKPOST%5D+%5BIG+8%5D%7C120214815490410124hQwK21wXxRVAL+3+-+1+6%7C120215179470900124hQwK21wXxRV1+1+6%7C120215179477180124hQwK21wXxRInstagram_Reels&sck=FBhQwK21wXxR%F0%9F%9F%A3+BM+7+C2++-+%5BABO%5D+%5BDARKPOST%5D+%5BIG+8%5D%7C120214815490410124hQwK21wXxRVAL+3+-+1+6%7C120215179470900124hQwK21wXxRV1+1+6%7C120215179477180124hQwK21wXxRInstagram_Reels"
           >
-            ADQUIRA AGORA
-          </button>
-          <div class="flex justify-center gap-4 mt-5">
-            <button onClick={() => setShowPopUpCongratulation(!showPopUpCongratulation)} class="px-4 py-2 text-red-500 rounded-xl transition">Agora não</button>
+            <p>ADQUIRA AGORA</p>
+          </a>
+          <div className="flex justify-center gap-4 mt-5">
+            <button onClick={() => setShowPopUpCongratulation(!showPopUpCongratulation)} className="px-4 py-2 text-red-500 rounded-xl transition">Agora não</button>
             </div>
         </div>
         </div>

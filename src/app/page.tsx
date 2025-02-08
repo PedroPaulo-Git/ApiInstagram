@@ -53,10 +53,10 @@ export default function Home() {
         });
       }, 100); // Atualiza a barra a cada 100ms
     }
-    console.log(progressDecry);
+ 
     if (progressDecry >= 100) {
       setPrimaryProgress(95);
-      console.log(progressDecry);
+     
     }
   }, [loading, progressDecry]);
 
@@ -91,11 +91,11 @@ export default function Home() {
           full_name: user.full_name,
           profile_pic_url: user.profile_pic_url,
         });
-        console.log(user);
+        // console.log(user);
         setUsername(user.username);
         setUsernameId(user.id);
       }
-      console.log(data);
+      // console.log(data);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     } finally {

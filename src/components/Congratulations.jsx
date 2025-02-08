@@ -199,12 +199,12 @@ const Congratulations = () => {
         </div>
 
         {/* Título */}
-        <h2 className="text-2xl mb-5 font-bold text-center text-[#2F5825]">
+        <h2 className="text-2xl mb-5 font-semibold text-center text-[#2F5825]">
           BONUS EXCLUSIVO
         </h2>
 
         {/* Texto */}
-        <p className="text-center mb-3 text-[#0B2010] font-bold">
+        <p className="text-center mb-3 text-[#0B2010] font-semibold">
           Adquirindo agora você pode ter a oportunidade de receber acesso ao{" "}
           <b>CloseX</b>, uma ferramenta que faz com que você tenha ao{" "}
           <b>CLOSE FRIENDS DE QUALQUER PESSOA!</b>
@@ -248,8 +248,8 @@ const Congratulations = () => {
               <Image
                 src={feedback}
                 width={300}
-                height={200}
-                className="shadow-md mt-4 mx-auto"
+                height={150}
+                className="shadow-md mt-4 mx-auto w-auto h-auto"
                 alt={`Feedback ${index + 1}`}
               />
             </div>
@@ -272,9 +272,7 @@ const Congratulations = () => {
 
         <div className="w-full flex justify-center">
           <div className="bg-[#FF7C83] rounded-xl mx-2 w-16 py-1 text-center drop-shadow-2xl">
-            <div className="text-4xl font-extrabold mt-1">
-              {timeLeft.hours }
-            </div>
+            <div className="text-4xl font-extrabold mt-1">{timeLeft.hours}</div>
             <div className="bottom-2 text-center text-xs">horas</div>
           </div>
 
@@ -287,7 +285,7 @@ const Congratulations = () => {
 
           <div className="bg-[#FF7C83] rounded-xl mx-2 w-16 py-1 text-center drop-shadow-2xl">
             <div className="text-4xl font-extrabold mt-1">
-              {timeLeft.seconds }
+              {timeLeft.seconds}
             </div>
             <div className="bottom-2 text-center text-xs">segundos</div>
           </div>

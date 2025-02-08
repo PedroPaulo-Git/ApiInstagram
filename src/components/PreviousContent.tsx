@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
+//import Audiomp3 from '../app/assets/audio.mp3'
+
+
 import Direct from "../app/assets/header-dm.png";
 import userDirect from "../app/assets/profile-m.png";
 
@@ -12,6 +15,7 @@ import Map from "../app/assets/map.png";
 import Gallery from "../app/assets/gallery.png";
 import AudioPng from "../app/assets/audio.svg";
 import userBlocked from "../app/assets/blocked-user.svg";
+import PUP from '../app/assets/PUP.svg';
 
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PopUpGetNow from '@/components/PopUpGetNow';
@@ -50,6 +54,9 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   const [highlights, setHighlights] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const [endAudio, setEndAudio] = useState<boolean>(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const [congratulation, setCongratulation] = useState<boolean>(false);
   const [showPopUpCongratulation, setShowPopUpCongratulation] = useState(false);
 
@@ -58,7 +65,16 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [localization, setLocalization] = useState<string>("");
 
-
+const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      const remainingTime = audioRef.current.duration - audioRef.current.currentTime;
+      
+      if (remainingTime <= 1) { 
+        audioRef.current.pause(); // Para o áudio 2 segundos antes
+        setEndAudio(true); // Mostra a div
+      }
+    }
+  };
 
   const handleViewReport = () => {
     setCongratulation(true);
@@ -91,6 +107,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
 
     getIpLocation();
   }, [congratulation]);
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -104,13 +122,13 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             {
               method: "GET",
               headers: {
-                "x-rapidapi-key":
-                  "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+                // "x-rapidapi-key":
+                //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
                 "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
               },
             }
           );
-          await delay(3000);
+          await delay(500);
           const followersData = await followersResponse.json();
           console.log("Dados de seguidores:", followersData);
           if (followersData.data?.items?.length) {
@@ -144,13 +162,13 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                 "Content-Type": "application/x-www-form-urlencoded",
                 "x-rapidapi-host":
                   "instagram-scraper-stable-api.p.rapidapi.com",
-                "x-rapidapi-key":
-                  "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff", // Use a chave de teste, se for o caso
+                // "x-rapidapi-key":
+                //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff", // Use a chave de teste, se for o caso
               },
               body: `username_or_url=https://www.instagram.com/${username}/`,
             }
           );
-          await delay(1000); // Aumenta o delay para reduzir o risco de 429
+          await delay(500); // Aumenta o delay para reduzir o risco de 429
           const highlightsData = await highlightsResponse.json();
           console.log(
             "Dados de highlights (get_ig_user_highlights.php):",
@@ -416,7 +434,13 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
           <p className="text-gray-400 text-center mt-1">
             Toque no player para escutar.
           </p>
-          <MediaThemeTailwindAudio
+          {endAudio ? (
+            <div>
+<Image alt='' src={PUP} className="mt-5 false" draggable="false"/>
+            </div>
+          ):(
+            <div>
+              <MediaThemeTailwindAudio
             className="w-full"
             style={
               {
@@ -425,12 +449,15 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
               } as any
             }
           >
-            <audio
-              slot="media"
-              src="https://stream.mux.com/fXNzVtmtWuyz00xnSrJg4OJH6PyNo6D02UzmgeKGkP5YQ/low.mp4"
-              playsInline
-            ></audio>
+           <audio slot="media" 
+           src="/audio.mp3" 
+           ref={audioRef}
+           onTimeUpdate={handleTimeUpdate}
+           playsInline></audio>
           </MediaThemeTailwindAudio>
+            </div>
+          )}
+        
 
           <h3 className="text-2xl mt-[100px] text-center">
             Por dentro do <b className="text-[#5468FF]">close friends</b>
@@ -446,7 +473,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
               aria-roledescription="carousel"
             >
               <div className="flex  gap-4 relative overflow-hidden ">
-                <div className="flex items-center  absolute w-[150px] mt-3">
+                <div className="flex items-center w-[200px] absolute justify-between  mt-3">
+                  <div className="flex items-center">
                   <Image
                     src={firstUser.profile_pic_url} // Exibe a primeira thumbnail corretamente
                     alt="user highlight"
@@ -457,25 +485,30 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                   <span className="text-white font-normal text-[11px] -mr-2">
                     {username}
                   </span>
+                  </div>
+                  
+                  
                   <Image
                     src={Close}
                     alt="user highlight"
                     width={100}
                     height={100}
-                    className="-mr-[200px] min-w-[80px] w-[30px]"
+                    className=" min-w-[80px] w-[30px]"
                   />
                 </div>
-                <div className="flex items-center absolute ml-[50px] w-[150px]  mt-3">
+                <div className="flex items-center absolute w-[200px] ml-[200px] justify-between  mt-3">
+                <div className="flex items-center">
                   <Image
                     src={firstUser.profile_pic_url} // Exibe a primeira thumbnail corretamente
                     alt="user highlight"
                     width={100}
                     height={100}
-                    className="rounded-full mr-2 ml-40 p-[1px] border-2 border-green-500 min-w-[32px] w-[30px]"
+                    className="rounded-full mr-2 border-2  p-[1px] border-green-500 ml-3 min-w-[32px] w-[30px]"
                   />
                   <span className="text-white font-normal text-[11px] -mr-2">
                     {username}
                   </span>
+                  </div>
                   <Image
                     src={Close}
                     alt="user highlight"
@@ -536,7 +569,12 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
         <div className="flex flex-col items-start">
            
         <CongratulationsComponent/>
-        {showPopUpCongratulation && <PopUpGetNow showPopUpCongratulation={showPopUpCongratulation} setShowPopUpCongratulation={setShowPopUpCongratulation} />}
+        {/* <button onClick={()=>setCongratulation(false)}>teste</button> */}
+        {showPopUpCongratulation && 
+        <PopUpGetNow 
+        username={username}
+        showPopUpCongratulation={showPopUpCongratulation} 
+        setShowPopUpCongratulation={setShowPopUpCongratulation} />}
      
       </div>
       
