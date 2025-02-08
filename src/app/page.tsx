@@ -2,7 +2,6 @@
 import Image from "next/image";
 import DecryptionGif from "../app/assets/gifdecryption.gif";
 import Success from "../app/assets/successblue.gif";
-import GifPadlock2 from "../app/assets/gifpacklock2.gif";
 import noPicture from "../app/assets/picturenone.png";
 import Logo from '../app/assets/espia.png';
 import { useState, useEffect } from "react";
@@ -28,11 +27,11 @@ export default function Home() {
   const [firstUser, setFirstUser] = useState<InstagramUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0); // Percentual de progresso
-  const [showImage, setShowImage] = useState(false); // Para controlar quando mostrar a imagem
+  // const [showImage, setShowImage] = useState(false); // Para controlar quando mostrar a imagem
   const [primaryProgress, setPrimaryProgress] = useState(25); // Progresso da barra principal, começa em 25%
   // Adicione um novo estado para armazenar o nome de usuário encontrado
   const [username, setUsername] = useState<string | null>(null);
-  const [usernameId, setUsernameId] = useState<string | null>(null);
+  // const [usernameId, setUsernameId] = useState<string | null>(null);
 
   const [decryptionProgress, setDecryptionProgress] = useState(false);
   const [progressDecry, setProgressDecry] = useState(0);
@@ -45,7 +44,7 @@ export default function Home() {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(progressInterval);
-            setShowImage(true); // Quando atingir 100%, mostra a imagem
+            // setShowImage(true); // Quando atingir 100%, mostra a imagem
             setPrimaryProgress(50);
             // Quando a circular chegar a 100%, a barra principal vai para 50%
             return 100;
@@ -66,7 +65,7 @@ export default function Home() {
 
     setLoading(true);
     setFirstUser(null);
-    setShowImage(false); // Esconde a imagem quando a busca começar
+    // setShowImage(false); // Esconde a imagem quando a busca começar
     setUsername(null);
 
     try {
@@ -94,7 +93,7 @@ export default function Home() {
         });
         // console.log(user);
         setUsername(user.username);
-        setUsernameId(user.id);
+        // setUsernameId(user.id);
       }
       // console.log(data);
     } catch (error) {
@@ -103,15 +102,15 @@ export default function Home() {
       setLoading(false);
     }
   };
-  const [showFirst, setShowFirst] = useState(true);
+  // const [showFirst, setShowFirst] = useState(true);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShowFirst((prev) => !prev);
-    }, 3000); // Alterna a cada 1 segundo (ajuste o tempo conforme necessário)
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setShowFirst((prev) => !prev);
+  //   }, 3000); // Alterna a cada 1 segundo (ajuste o tempo conforme necessário)
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <div className="flex flex-col items-center max-w-[450px] w-full px-8 mx-auto h-svh bg-[#171531] ">

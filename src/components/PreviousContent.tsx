@@ -43,11 +43,15 @@ interface Follower {
   full_name: string;
   profile_pic_url: string;
 }
+interface CustomCSS extends React.CSSProperties {
+  "--media-primary-color"?: string;
+  "--media-secondary-color"?: string;
+}
 
 const PreviousContent: React.FC<PreviousContentProps> = ({
   username,
   firstUser,
-  id,
+  // id,
   setPrimaryProgress,
 }) => {
   const [followers, setFollowers] = useState<Follower[]>([]);
@@ -61,8 +65,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   const [showPopUpCongratulation, setShowPopUpCongratulation] = useState(false);
 
   const [followersError, setFollowersError] = useState<string | null>(null);
-  const [highlightsError, setHighlightsError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // const [highlightsError, setHighlightsError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
   const [localization, setLocalization] = useState<string>("");
 
 const handleTimeUpdate = () => {
@@ -133,7 +137,7 @@ const handleTimeUpdate = () => {
           console.log("Dados de seguidores:", followersData);
           if (followersData.data?.items?.length) {
             setFollowers(
-              followersData.data.items.slice(0, 10).map((f: any) => ({
+              followersData.data.items.slice(0, 10).map((f: Follower) => ({
                 username: f.username,
                 full_name: f.full_name,
                 profile_pic_url: f.profile_pic_url,
@@ -205,15 +209,17 @@ const handleTimeUpdate = () => {
               const thumbnailUrl = thumbnailData.items[0].image_versions2.candidates[0].url;
               setHighlights([thumbnailUrl]); // Atualiza a imagem do highlight com a thumbnail
             }
-          } else {
-            setHighlightsError("Nenhum highlight encontrado.");
-          }
+          } 
+          // else {
+          //   // setHighlightsError("Nenhum highlight encontrado.");
+          // }
         } catch (err) {
           console.error("Erro ao buscar highlights:", err);
-          setHighlightsError("Erro ao carregar highlights.");
+          // setHighlightsError("Erro ao carregar highlights.");
         }
       } catch (err) {
-        setError("Erro ao carregar dados.");
+        // setError("Erro ao carregar dados.");
+        console.log(err)
       } finally {
         setLoading(false);
       }
@@ -446,7 +452,7 @@ const handleTimeUpdate = () => {
               {
                 "--media-primary-color": "#404040",
                 "--media-secondary-color": "#171717",
-              } as any
+              } as CustomCSS
             }
           >
            <audio slot="media" 

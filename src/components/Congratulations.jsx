@@ -314,7 +314,7 @@ const Congratulations = () => {
         <div class="w-full bottom-2 mt-5 flex justify-center items-center ">
           <a
             class=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://checkout.perfectpay.com.br/pay/PPU38CP8I9K?utm_source=FB&utm_campaign=%F0%9F%9F%A3+BM+7+C2++-+%5BABO%5D+%5BDARKPOST%5D+%5BIG+8%5D%7C120214815490410124&utm_medium=VAL+3+-+1+6%7C120215179470900124&utm_content=V1+1+6%7C120215179477180124&utm_term=Instagram_Reels&xcod=FBhQwK21wXxR%F0%9F%9F%A3+BM+7+C2++-+%5BABO%5D+%5BDARKPOST%5D+%5BIG+8%5D%7C120214815490410124hQwK21wXxRVAL+3+-+1+6%7C120215179470900124hQwK21wXxRV1+1+6%7C120215179477180124hQwK21wXxRInstagram_Reels&sck=FBhQwK21wXxR%F0%9F%9F%A3+BM+7+C2++-+%5BABO%5D+%5BDARKPOST%5D+%5BIG+8%5D%7C120214815490410124hQwK21wXxRVAL+3+-+1+6%7C120215179470900124hQwK21wXxRV1+1+6%7C120215179477180124hQwK21wXxRInstagram_Reels"
+            href="https://pay.checkoutghost.com/checkout/6c3855d2-da80-4748-873a-9972e747b169"
           >
             <p>Acessar Agora</p>
           </a>
