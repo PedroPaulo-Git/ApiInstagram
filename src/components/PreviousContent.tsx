@@ -62,7 +62,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
 
   const handleViewReport = () => {
     setCongratulation(true);
-    setPrimaryProgress(100); // Atualiza o progresso para 100%
+    setPrimaryProgress(100); 
+    window.scrollTo({ top: 0});
   };
 
   const carouselRef = useRef<HTMLUListElement>(null);
@@ -532,11 +533,13 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
           </button>
         </div>
       ) : (
-        <div className="w-full overflow-hidden mx-auto">
-            <CongratulationsComponent/>
-           {showPopUpCongratulation && <PopUpGetNow showPopUpCongratulation={showPopUpCongratulation} setShowPopUpCongratulation={setShowPopUpCongratulation} />}
-
-        </div>
+        <div className="flex flex-col items-start">
+           
+        <CongratulationsComponent/>
+        {showPopUpCongratulation && <PopUpGetNow showPopUpCongratulation={showPopUpCongratulation} setShowPopUpCongratulation={setShowPopUpCongratulation} />}
+     
+      </div>
+      
       )}
     </div>
   );
