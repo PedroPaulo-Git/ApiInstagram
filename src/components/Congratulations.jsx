@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import CongratulationsImage from "../app/assets/congratulations.png";
-import Confetti from "../app/assets/confetti.png";
-import Champion from "../app/assets/champion.svg";
-import Verify from "../app/assets/verify-foreground.svg";
-import Cf from "../app/assets/cf-logo-1.png";
 
-import Feedback1 from "../app/assets/feedback.png";
-import Feedback2 from "../app/assets/feedback_1.png";
-import Feedback3 from "../app/assets/feedback_2.png";
-import Feedback4 from "../app/assets/feedback_3.png";
-import Feedback5 from "../app/assets/feedback_4.png";
+import CongratulationsImage from "../../public/assets/congratulations.png";
+import Confetti from "../../public/assets/confetti.png";
+import Champion from "../../public/assets/champion.svg";
+import Verify from "../../public/assets/verify-foreground.svg";
+import Cf from "../../public/assets/cf-logo-1.png";
+
+import Feedback1 from "../../public/assets/feedback.png";
+import Feedback2 from "../../public/assets/feedback_1.png";
+import Feedback3 from "../../public/assets/feedback_2.png";
+import Feedback4 from "../../public/assets/feedback_3.png";
+import Feedback5 from "../../public/assets/feedback_4.png";
+
 
 const Congratulations = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

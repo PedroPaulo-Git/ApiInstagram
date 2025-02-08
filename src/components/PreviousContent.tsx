@@ -3,24 +3,22 @@ import Image from "next/image";
 
 //import Audiomp3 from '../app/assets/audio.mp3'
 
+import Direct from "../../public/assets/header-dm.png";  // Corrigido
+import userDirect from "../../public/assets/profile-m.png";  // Corrigido
 
-import Direct from "../app/assets/header-dm.png";
-import userDirect from "../app/assets/profile-m.png";
-
-import templateHighlights from "../app/assets/storiesEdited2.png";
-import CloseFriendsStories from "../app/assets/story_1.png";
-import CloseFriendsStories2 from "../app/assets/story_2.png";
-import Close from "../app/assets/close.png";
-import Map from "../app/assets/map.png";
-import Gallery from "../app/assets/gallery.png";
-import AudioPng from "../app/assets/audio.svg";
-import userBlocked from "../app/assets/blocked-user.svg";
-import PUP from '../app/assets/PUP.svg';
+import templateHighlights from "../../public/assets/storiesEdited2.png";  // Corrigido
+import CloseFriendsStories from "../../public/assets/story_1.png";  // Corrigido
+import CloseFriendsStories2 from "../../public/assets/story_2.png";  // Corrigido
+import Close from "../../public/assets/close.png";  // Corrigido
+import Map from "../../public/assets/map.png";  // Corrigido
+import Gallery from "../../public/assets/gallery.png";  // Corrigido
+import AudioPng from "../../public/assets/audio.svg";  // Corrigido
+import userBlocked from "../../public/assets/blocked-user.svg";  // Corrigido
+import PUP from '../../public/assets/PUP.svg';  // Corrigido
 
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PopUpGetNow from '@/components/PopUpGetNow';
 import CongratulationsComponent from '@/components/Congratulations';
-
 
 import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 interface PreviousContentProps {

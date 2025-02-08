@@ -1,9 +1,10 @@
 "use client";
 import Image from "next/image";
-import DecryptionGif from "../app/assets/gifdecryption.gif";
-import Success from "../app/assets/successblue.gif";
-import noPicture from "../app/assets/picturenone.png";
-import Logo from '../app/assets/espia.png';
+import DecryptionGif from "../../public/assets/gifdecryption.gif";  
+import Success from "../../public/assets/successblue.gif";
+import noPicture from "../../public/assets/picturenone.png";
+import Logo from "../../public/assets/espia.png";
+
 import { useState, useEffect } from "react";
 import { GiPadlock } from "react-icons/gi";
 import { IoSearchSharp } from "react-icons/io5";
