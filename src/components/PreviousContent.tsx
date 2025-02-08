@@ -122,8 +122,8 @@ const handleTimeUpdate = () => {
             {
               method: "GET",
               headers: {
-                // "x-rapidapi-key":
-                //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+                "x-rapidapi-key":
+                  "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
                 "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
               },
             }
@@ -162,8 +162,8 @@ const handleTimeUpdate = () => {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "x-rapidapi-host":
                   "instagram-scraper-stable-api.p.rapidapi.com",
-                // "x-rapidapi-key":
-                //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff", // Use a chave de teste, se for o caso
+                "x-rapidapi-key":
+                  "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff", // Use a chave de teste, se for o caso
               },
               body: `username_or_url=https://www.instagram.com/${username}/`,
             }

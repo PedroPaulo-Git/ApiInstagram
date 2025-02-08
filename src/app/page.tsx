@@ -4,6 +4,7 @@ import DecryptionGif from "../app/assets/gifdecryption.gif";
 import Success from "../app/assets/successblue.gif";
 import GifPadlock2 from "../app/assets/gifpacklock2.gif";
 import noPicture from "../app/assets/picturenone.png";
+import Logo from '../app/assets/espia.png';
 import { useState, useEffect } from "react";
 import { GiPadlock } from "react-icons/gi";
 import { IoSearchSharp } from "react-icons/io5";
@@ -123,9 +124,11 @@ export default function Home() {
         </div>
 
         {progress < 10 && (
-          <h1 className="text-center text-2xl font-bold text-cyan-400 sm:text-3xl">
-            Logo
-          </h1>
+          <Image
+          src={Logo}
+          alt="Loading..."
+          className="w-52 mx-auto "
+        />
         )}
         {decryptionProgress && progressDecry < 100 && (
           <div className="py-6">
