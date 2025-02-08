@@ -75,7 +75,7 @@ export default function Home() {
           method: "GET",
           headers: {
             "x-rapidapi-key":
-              "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+              "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
             "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
           },
         }
@@ -113,9 +113,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center h-svh bg-[#171531]">
+    <div className="flex flex-col items-center h-svh bg-[#171531] sm:overflow-x-hidden sm:px-10">
       <div className=" w-full max-w-md  my-10 space-y-5">
-        <div className="relative w-full max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
+        <div className="relative w-[80%] max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
           <div
             className="h-2 bg-cyan-400 rounded-full transition-all duration-500"
             style={{ width: `${primaryProgress}%` }} // Barra principal

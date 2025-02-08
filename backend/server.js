@@ -20,7 +20,7 @@ app.get("/api/user/:username", async (req, res) => {
       {
         headers: {
           "X-RapidAPI-Host": "instagram191.p.rapidapi.com",
-          "X-RapidAPI-Key": "e9b32b11efmsh61c3992491c9be9p1319a0jsn3179f3d855a3",
+          "X-RapidAPI-Key": "6fd7e57a76msha10f59af253aab5p131b0fjsnc4948829518a",
         },
       }
     );
