@@ -14,12 +14,16 @@ import AudioPng from "../app/assets/audio.svg";
 import userBlocked from "../app/assets/blocked-user.svg";
 
 import LoadingSpinner from "@/components/LoadingSpinner";
+import PopUpGetNow from '@/components/PopUpGetNow';
+import CongratulationsComponent from '@/components/Congratulations';
+
 
 import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 interface PreviousContentProps {
   username: string;
   firstUser: FirstUser;
   id: string;
+  setPrimaryProgress: React.Dispatch<React.SetStateAction<number>>;
 }
 
 interface FirstUser {
@@ -40,21 +44,39 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   username,
   firstUser,
   id,
+  setPrimaryProgress,
 }) => {
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [highlights, setHighlights] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const [congratulation, setCongratulation] = useState<boolean>(false);
+  const [showPopUpCongratulation, setShowPopUpCongratulation] = useState(false);
 
   const [followersError, setFollowersError] = useState<string | null>(null);
   const [highlightsError, setHighlightsError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [localization, setLocalization] = useState<string>("");
 
+
+
+  const handleViewReport = () => {
+    setCongratulation(true);
+    setPrimaryProgress(100); // Atualiza o progresso para 100%
+  };
+
   const carouselRef = useRef<HTMLUListElement>(null);
   const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
   useEffect(() => {
+    if (congratulation) {
+      const timer = setTimeout(() => {
+        setShowPopUpCongratulation(true);
+      }, 5000);
+  
+      return () => clearTimeout(timer); // Limpa o timer se `congratulation` mudar antes do tempo
+    } else {
+      setShowPopUpCongratulation(false); // Garante que o PopUp desapareça se `congratulation` for falso
+    }
     const getIpLocation = async () => {
       try {
         const response = await fetch("http://ip-api.com/json/");
@@ -67,7 +89,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
     };
 
     getIpLocation();
-  }, []);
+  }, [congratulation]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -81,8 +103,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             {
               method: "GET",
               headers: {
-                "x-rapidapi-key":
-                  "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+                // "x-rapidapi-key":
+                //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
                 "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
               },
             }
@@ -121,8 +143,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                 "Content-Type": "application/x-www-form-urlencoded",
                 "x-rapidapi-host":
                   "instagram-scraper-stable-api.p.rapidapi.com",
-                "x-rapidapi-key":
-                  "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff", // Use a chave de teste, se for o caso
+                // "x-rapidapi-key":
+                //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff", // Use a chave de teste, se for o caso
               },
               body: `username_or_url=https://www.instagram.com/${username}/`,
             }
@@ -148,8 +170,8 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
               {
                 method: "POST", // Alterado de GET para POST
                 headers: {
-                  "x-rapidapi-key":
-                    "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+                  // "x-rapidapi-key":
+                  //   "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
                   "x-rapidapi-host":
                     "instagram-scraper-stable-api.p.rapidapi.com",
                   "Content-Type": "application/x-www-form-urlencoded",
@@ -199,7 +221,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   return (
     <div className=" w-full mx-auto">
       {!congratulation ? (
-        <div className="flex flex-col max-w-[450px]  text-white pl-16 pr-10 lg:pl-0 lg:pr-0 overflow-x-hidden">
+        <div className="flex flex-col max-w-[450px]  text-white pl-16 pr-10 lg:pl-0 lg:pr-0 ">
           <h1 className="text-4xl mt-8 text-center font-bold">
             <b className="text-[#5468FF]">Prévia</b> do seu @
           </h1>
@@ -488,7 +510,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
           </h3>
           <Image src={Gallery} alt="user highlight" className="w-full mb-4" />
           <button
-            onClick={() => setCongratulation(true)}
+            onClick={handleViewReport} 
             className=" mb-40 w-full bg-[#5266FF] p-6 text-xl font-semibold rounded-xl inline-flex items-center justify-center "
           >
             <svg
@@ -510,29 +532,10 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
           </button>
         </div>
       ) : (
-        <div>
-          <h1>TESTE</h1>
-          <button
-            onClick={() => setCongratulation(false)}
-            className=" mb-40 bg-[#5266FF] p-6 text-xl font-semibold rounded-xl inline-flex items-center justify-center "
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-eye mr-3 size-6"
-            >
-              <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>{" "}
-            Ver relatório completo
-          </button>
+        <div className="w-full overflow-hidden mx-auto">
+            <CongratulationsComponent/>
+           {showPopUpCongratulation && <PopUpGetNow showPopUpCongratulation={showPopUpCongratulation} setShowPopUpCongratulation={setShowPopUpCongratulation} />}
+
         </div>
       )}
     </div>

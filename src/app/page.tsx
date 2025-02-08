@@ -113,7 +113,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center h-svh bg-[#171531] sm:overflow-x-hidden sm:px-10">
+    <div className="flex flex-col items-center max-w-[450px] w-full px-8 mx-auto h-svh bg-[#171531] ">
       <div className=" w-full max-w-md  my-10 space-y-5">
         <div className="relative w-[80%] max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
           <div
@@ -286,6 +286,7 @@ export default function Home() {
                 <div>
                   {username && firstUser && (
                     <PreviousContent
+                    setPrimaryProgress={setPrimaryProgress}
                       username={username}
                       firstUser={firstUser}
                       id={firstUser.id}
