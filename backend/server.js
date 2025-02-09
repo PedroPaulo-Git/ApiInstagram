@@ -17,8 +17,9 @@ app.use(
 //GET LOCALIZATION
 app.get("/api/location", async (req, res) => {
   try {
-    const response = await axios.get("http://ip-api.com/json/");
+    const response = await axios.get("https://ipinfo.io/json?token=e40c53e27a59ce");
     res.json(response.data);
+    console.log(response.data)
   } catch (error) {
     console.error("Erro ao buscar localização:", error);
     res.status(500).json({ message: "Erro ao obter localização" });
@@ -45,7 +46,7 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     );
 
     const profileData = profileResponse.data.data;
-    console.log(profileData);
+    //console.log(profileData);
     if (!profileData || !profileData.profile_pic_url_hd) {
       return res.status(404).json({
         status: "error",
@@ -126,7 +127,7 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
         })
       );
 
-      console.log("Seguidores encontrados:", followers);
+      //console.log("Seguidores encontrados:", followers);
       res.json({ status: "success", followers });
     } else {
       console.warn(`Nenhum seguidor encontrado para: ${username}`);
