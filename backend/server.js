@@ -18,8 +18,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-// FETCH PROFILE IMAGE
+// FETCH PROFILE IMAGE && GET USERNAME && FULL NAME
 
 app.get("/api/instagram-profile-pic/:username", async (req, res) => {
   const username = req.params.username;
@@ -30,8 +29,7 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
       `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${username}`,
       {
         headers: {
-          "x-rapidapi-key":
-            "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+          "x-rapidapi-key": "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
           "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
         },
       }
@@ -45,8 +43,18 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
       response.data.data.profile_pic_url_hd
     ) {
       const imageUrl = response.data.data.profile_pic_url_hd;
+      const id = response.data.data.id;
+      const fullName = response.data.data.full_name;
+      const username = response.data.data.username;
+
       console.log(`Imagem encontrada: ${imageUrl}`);
-      res.json({ status: "success", profile_pic_url_hd: imageUrl });
+      res.json({
+        status: "success",
+        profile_pic_url_hd: imageUrl,
+        id,
+        full_name: fullName,
+        username,
+      });
     } else {
       console.warn(`Imagem não encontrada para: ${username}`);
       res
@@ -55,14 +63,13 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     }
   } catch (error) {
     console.error("Erro ao buscar imagem:", error.message);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        message: "Erro ao buscar imagem do Instagram.",
-      });
+    res.status(500).json({
+      status: "error",
+      message: "Erro ao buscar imagem do Instagram.",
+    });
   }
 });
+
 
 // FETCH FOLLOWERS
 
