@@ -1,25 +1,33 @@
-const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
-const helmet = require("helmet");
-
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+const express = require('express');
 const app = express();
 
-// Helmet e CORS
-app.use(helmet());
-const corsOptions = {
-  origin: [
-    "https://espiafacil.com.br",  // Origem original permitida
-    "http://localhost:3000",      // Adiciona o localhost ao CORS para desenvolvimento local
-  ], // Permite apenas esse domínio
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Permite os métodos HTTP necessários
-  allowedHeaders: ["Content-Type", "Authorization", "x-rapidapi-key"], // Permite esses headers
-  credentials: true, // Permite cookies, se necessário
+// Middleware para configurar CORS
+const cors = require('cors');
+app.use(cors());
+
+// Função para baixar a imagem do perfil
+const downloadImage = async (url, filename) => {
+  const pathToSave = path.join(__dirname, 'images', filename);
+  const writer = fs.createWriteStream(pathToSave);
+  
+  const response = await axios({
+    url,
+    method: 'GET',
+    responseType: 'stream',
+  });
+
+  response.data.pipe(writer);
+
+  return new Promise((resolve, reject) => {
+    writer.on('finish', () => resolve(pathToSave));
+    writer.on('error', reject);
+  });
 };
 
-app.use(cors(corsOptions));
-// FETCH PROFILE IMAGE && GET USERNAME && FULL NAME
-
+// FETCH PROFILE IMAGE & GET USERNAME & FULL NAME
 app.get("/api/instagram-profile-pic/:username", async (req, res) => {
   const username = req.params.username;
   console.log(`Buscando imagem de perfil para: ${username}`);
@@ -47,19 +55,20 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
       const fullName = response.data.data.full_name;
       const username = response.data.data.username;
 
-      console.log(`Imagem encontrada: ${imageUrl}`);
+      // Baixar a imagem e salvar no servidor
+      const imagePath = await downloadImage(imageUrl, `${username}_profile.jpg`);
+      console.log(`Imagem salva em: ${imagePath}`);
+
       res.json({
         status: "success",
-        profile_pic_url_hd: imageUrl,
+        profile_pic_url: `/images/${username}_profile.jpg`,  // A URL que o cliente vai acessar
         id,
         full_name: fullName,
         username,
       });
     } else {
       console.warn(`Imagem não encontrada para: ${username}`);
-      res
-        .status(404)
-        .json({ status: "error", message: "Imagem não encontrada." });
+      res.status(404).json({ status: "error", message: "Imagem não encontrada." });
     }
   } catch (error) {
     console.error("Erro ao buscar imagem:", error.message);
@@ -70,9 +79,7 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
   }
 });
 
-
 // FETCH FOLLOWERS
-
 app.get("/api/instagram-followers/:username", async (req, res) => {
   const username = req.params.username;
   console.log(`Buscando seguidores para: ${username}`);
@@ -112,20 +119,10 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
   }
 });
 
+// Servir as imagens baixadas
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Iniciar o servidor
 
 
 const PORT = process.env.PORT || 5000;
