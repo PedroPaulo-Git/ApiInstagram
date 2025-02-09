@@ -8,7 +8,10 @@ const app = express();
 // Helmet e CORS
 app.use(helmet());
 const corsOptions = {
-  origin: "https://espiafacil.com.br", // Permite apenas esse domínio
+  origin: [
+    "https://espiafacil.com.br",  // Origem original permitida
+    "http://localhost:3000",      // Adiciona o localhost ao CORS para desenvolvimento local
+  ], // Permite apenas esse domínio
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Permite os métodos HTTP necessários
   allowedHeaders: ["Content-Type", "Authorization", "x-rapidapi-key"], // Permite esses headers
   credentials: true, // Permite cookies, se necessário
