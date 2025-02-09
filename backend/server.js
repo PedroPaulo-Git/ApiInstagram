@@ -14,6 +14,18 @@ app.use(
     credentials: true,
   })
 );
+//GET LOCALIZATION
+app.get("/api/location", async (req, res) => {
+  try {
+    const response = await axios.get("http://ip-api.com/json/");
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar localização:", error);
+    res.status(500).json({ message: "Erro ao obter localização" });
+  }
+});
+
+
 
 // Rota otimizada para buscar informações do perfil
 app.get("/api/instagram-profile-pic/:username", async (req, res) => {
