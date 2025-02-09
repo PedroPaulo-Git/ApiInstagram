@@ -36,25 +36,24 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
       });
     }
     
-    // 2. Buscar a imagem do perfil e convertê-la para base64
+    // 2. Buscar a imagem do perfil e converter para base64
     const imageResponse = await axios({
       url: profileData.profile_pic_url_hd,
       method: 'GET',
-      responseType: 'arraybuffer'  // Obter os dados binários da imagem
+      responseType: 'arraybuffer'
     });
     
     const base64Image = Buffer.from(imageResponse.data, 'binary').toString('base64');
     const contentType = imageResponse.headers['content-type'];
-    // Cria uma data URL para a imagem
     const imageDataUrl = `data:${contentType};base64,${base64Image}`;
     
-    // 3. Retornar um JSON com os dados do perfil e a imagem (como data URL)
+    // 3. Retornar os dados do perfil com a Data URL da imagem
     res.json({
       status: "success",
       id: profileData.id,
       username: profileData.username,
       full_name: profileData.full_name,
-      profile_pic_url: imageDataUrl  // Aqui a imagem é enviada como uma data URL
+      profile_pic_url: imageDataUrl
     });
     
   } catch (error) {
@@ -65,7 +64,6 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     });
   }
 });
-
 
 
 // FETCH FOLLOWERS
