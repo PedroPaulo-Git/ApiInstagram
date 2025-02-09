@@ -65,7 +65,6 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
   }
 });
 
-
 // FETCH FOLLOWERS
 app.get("/api/instagram-followers/:username", async (req, res) => {
   const username = req.params.username;
@@ -85,11 +84,28 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
     console.log("Resposta da API recebida:", response.data);
 
     if (response.data && response.data.data && response.data.data.items) {
-      const followers = response.data.data.items.slice(0, 10).map((f) => ({
-        username: f.username,
-        full_name: f.full_name,
-        profile_pic_url: f.profile_pic_url,
-      }));
+      // Mapeia os seguidores e prepara a lista para enviar
+      const followers = await Promise.all(
+        response.data.data.items.slice(0, 10).map(async (f) => {
+          // Para cada seguidor, buscamos a imagem do perfil
+          const imageResponse = await axios({
+            url: f.profile_pic_url, // URL da foto do perfil
+            method: 'GET',
+            responseType: 'arraybuffer', // Fazendo o fetch como array de bytes
+          });
+
+          // Cria um Buffer e converte para um formato que o front-end possa usar
+          const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+          const imageBase64 = imageBuffer.toString('base64');
+          const imageUrl = `data:${imageResponse.headers['content-type']};base64,${imageBase64}`;
+
+          return {
+            username: f.username,
+            full_name: f.full_name,
+            profile_pic_url: imageUrl,  // URL da imagem convertida para Base64
+          };
+        })
+      );
 
       console.log("Seguidores encontrados:", followers);
       res.json({ status: "success", followers });
