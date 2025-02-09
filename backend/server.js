@@ -3,90 +3,61 @@ const path = require('path');
 const axios = require('axios');
 const express = require('express');
 const app = express();
-
-// Middleware para configurar CORS
+// Middleware CORS melhorado
 const cors = require('cors');
-// Middleware para configurar CORS permitindo apenas localhost:3000 e espiafacil.com.br
-const corsOptions = {
-  origin: ['http://localhost:3000', 'https://espiafacil.com.br'],  // Lista de origens permitidas
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // Cabeçalhos permitidos
-};
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://espiafacil.com.br'],
+  methods: ['GET'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true
+}));
 
-app.use(cors(corsOptions)); // Usar as opções de CORS configuradas
-
-
-// Função para baixar a imagem do perfil
-const downloadImage = async (url, filename) => {
-  const pathToSave = path.join(__dirname, 'images', filename);
-  const writer = fs.createWriteStream(pathToSave);
-  
-  const response = await axios({
-    url,
-    method: 'GET',
-    responseType: 'stream',
-  });
-
-  response.data.pipe(writer);
-
-  return new Promise((resolve, reject) => {
-    writer.on('finish', () => resolve(pathToSave));
-    writer.on('error', reject);
-  });
-};
-
-// FETCH PROFILE IMAGE & GET USERNAME & FULL NAME
+// Rota otimizada para buscar informações do perfil
 app.get("/api/instagram-profile-pic/:username", async (req, res) => {
-  const username = req.params.username;
-  console.log(`Buscando imagem de perfil para: ${username}`);
-
   try {
-    const response = await axios.get(
-      `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${username}`,
-      {
-        headers: {
-          "x-rapidapi-key": "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
-          "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-        },
+    const { username } = req.params;
+    
+    // 1. Buscar dados do perfil
+    const profileResponse = await axios.get(`https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${username}`, {
+      headers: {
+        "x-rapidapi-key": "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+        "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
       }
-    );
+    });
 
-    console.log("Resposta da API recebida:", response.data);
-
-    if (
-      response.data &&
-      response.data.data &&
-      response.data.data.profile_pic_url_hd
-    ) {
-      const imageUrl = response.data.data.profile_pic_url_hd;
-      const id = response.data.data.id;
-      const fullName = response.data.data.full_name;
-      const username = response.data.data.username;
-
-      // Baixar a imagem e salvar no servidor
-      const imagePath = await downloadImage(imageUrl, `${username}_profile.jpg`);
-      console.log(`Imagem salva em: ${imagePath}`);
-
-      res.json({
-        status: "success",
-        profile_pic_url: `/images/${username}_profile.jpg`,  // A URL que o cliente vai acessar
-        id,
-        full_name: fullName,
-        username,
+    // 2. Verificar resposta
+    if (!profileResponse.data?.data?.profile_pic_url_hd) {
+      return res.status(404).json({ 
+        status: "error", 
+        message: "Perfil não encontrado" 
       });
-    } else {
-      console.warn(`Imagem não encontrada para: ${username}`);
-      res.status(404).json({ status: "error", message: "Imagem não encontrada." });
     }
+
+    // 3. Buscar imagem diretamente (sem salvar)
+    const imageResponse = await axios({
+      url: profileResponse.data.data.profile_pic_url_hd,
+      method: 'GET',
+      responseType: 'stream'
+    });
+
+    // 4. Definir headers para o cliente
+    res.set({
+      'Content-Type': imageResponse.headers['content-type'],
+      'Cache-Control': 'public, max-age=86400', // Cache de 24h
+      'Access-Control-Expose-Headers': 'Content-Type'
+    });
+
+    // 5. Pipe direto da resposta
+    imageResponse.data.pipe(res);
+
   } catch (error) {
-    console.error("Erro ao buscar imagem:", error.message);
+    console.error('Erro no proxy:', error);
     res.status(500).json({
       status: "error",
-      message: "Erro ao buscar imagem do Instagram.",
+      message: error.response?.data?.message || "Erro interno do servidor"
     });
   }
 });
-
 // FETCH FOLLOWERS
 app.get("/api/instagram-followers/:username", async (req, res) => {
   const username = req.params.username;
