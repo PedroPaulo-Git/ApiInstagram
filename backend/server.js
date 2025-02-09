@@ -16,49 +16,42 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Rota da API para buscar detalhes do usuário do Instagram
-app.get("/api/user/:username", async (req, res) => {
+
+// FETCH PROFILE IMAGE
+
+app.get("/api/instagram-profile-pic/:username", async (req, res) => {
   const username = req.params.username;
-  console.log(`Recebida solicitação para buscar dados do usuário: ${username}`);
+  console.log(`Buscando imagem de perfil para: ${username}`);
 
   try {
     const response = await axios.get(
-      `https://instagram191.p.rapidapi.com/v4/user-details-by-username?username=${username}`,
+      `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${username}`,
       {
         headers: {
-          "X-RapidAPI-Host": "instagram191.p.rapidapi.com",
-          "X-RapidAPI-Key": "6fd7e57a76msha10f59af253aab5p131b0fjsnc4948829518a",
+          "x-rapidapi-key": "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+          "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
         },
       }
     );
 
-    console.log("Resposta recebida da API:", response.data);
+    console.log("Resposta da API recebida:", response.data);
 
-    if (response.data && response.data.data) {
-      res.json({
-        status: "success",
-        data: response.data.data,
-      });
+    if (response.data && response.data.data && response.data.data.profile_pic_url_hd) {
+      const imageUrl = response.data.data.profile_pic_url_hd;
+      console.log(`Imagem encontrada: ${imageUrl}`);
+      res.json({ status: "success", profile_pic_url_hd: imageUrl });
     } else {
-      console.warn(`Nenhum dado encontrado para o usuário: ${username}`);
-      res.status(404).json({
-        status: "error",
-        message: "Usuário não encontrado ou dados inválidos.",
-      });
+      console.warn(`Imagem não encontrada para: ${username}`);
+      res.status(404).json({ status: "error", message: "Imagem não encontrada." });
     }
   } catch (error) {
-    console.error("Erro ao buscar usuário:", error.message);
-
-    if (error.response) {
-      console.error("Detalhes do erro:", error.response.data);
-    }
-
-    res.status(500).json({
-      status: "error",
-      message: "Erro ao buscar usuário.",
-    });
+    console.error("Erro ao buscar imagem:", error.message);
+    res.status(500).json({ status: "error", message: "Erro ao buscar imagem do Instagram." });
   }
 });
+
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
