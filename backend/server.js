@@ -7,7 +7,9 @@ const app = express();
 
 // Helmet e CORS
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: 'https://espiafacil.com.br', // Aqui você coloca o URL do seu front-end
+}));
 
 // Rota da API para buscar detalhes do usuário do Instagram
 app.get("/api/user/:username", async (req, res) => {
@@ -52,6 +54,7 @@ app.get("/api/user/:username", async (req, res) => {
     });
   }
 });
-
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
