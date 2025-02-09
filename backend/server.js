@@ -6,7 +6,15 @@ const app = express();
 
 // Middleware para configurar CORS
 const cors = require('cors');
-app.use(cors());
+// Middleware para configurar CORS permitindo apenas localhost:3000 e espiafacil.com.br
+const corsOptions = {
+  origin: ['http://localhost:3000', 'https://espiafacil.com.br'],  // Lista de origens permitidas
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'], // Cabeçalhos permitidos
+};
+
+app.use(cors(corsOptions)); // Usar as opções de CORS configuradas
+
 
 // Função para baixar a imagem do perfil
 const downloadImage = async (url, filename) => {
