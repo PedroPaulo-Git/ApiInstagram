@@ -18,38 +18,45 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     const { username } = req.params;
     
     // 1. Buscar dados do perfil
-    const profileResponse = await axios.get(`https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${username}`, {
-      headers: {
-        "x-rapidapi-key": "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
-        "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
+    const profileResponse = await axios.get(
+      `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${username}`,
+      {
+        headers: {
+          "x-rapidapi-key": "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
+          "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
+        },
       }
-    });
-
-    // 2. Verificar resposta
-    if (!profileResponse.data?.data?.profile_pic_url_hd) {
+    );
+    
+    const profileData = profileResponse.data.data;
+    if (!profileData || !profileData.profile_pic_url_hd) {
       return res.status(404).json({ 
         status: "error", 
         message: "Perfil não encontrado" 
       });
     }
-
-    // 3. Buscar imagem diretamente (sem salvar)
+    
+    // 2. Buscar a imagem do perfil e convertê-la para base64
     const imageResponse = await axios({
-      url: profileResponse.data.data.profile_pic_url_hd,
+      url: profileData.profile_pic_url_hd,
       method: 'GET',
-      responseType: 'stream'
+      responseType: 'arraybuffer'  // Obter os dados binários da imagem
     });
-
-    // 4. Definir headers para o cliente
-    res.set({
-      'Content-Type': imageResponse.headers['content-type'],
-      'Cache-Control': 'public, max-age=86400', // Cache de 24h
-      'Access-Control-Expose-Headers': 'Content-Type'
+    
+    const base64Image = Buffer.from(imageResponse.data, 'binary').toString('base64');
+    const contentType = imageResponse.headers['content-type'];
+    // Cria uma data URL para a imagem
+    const imageDataUrl = `data:${contentType};base64,${base64Image}`;
+    
+    // 3. Retornar um JSON com os dados do perfil e a imagem (como data URL)
+    res.json({
+      status: "success",
+      id: profileData.id,
+      username: profileData.username,
+      full_name: profileData.full_name,
+      profile_pic_url: imageDataUrl  // Aqui a imagem é enviada como uma data URL
     });
-
-    // 5. Pipe direto da resposta
-    imageResponse.data.pipe(res);
-
+    
   } catch (error) {
     console.error('Erro no proxy:', error);
     res.status(500).json({
@@ -58,6 +65,9 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     });
   }
 });
+
+
+
 // FETCH FOLLOWERS
 app.get("/api/instagram-followers/:username", async (req, res) => {
   const username = req.params.username;
@@ -97,11 +107,6 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
     });
   }
 });
-
-// Servir as imagens baixadas
-app.use('/images', express.static(path.join(__dirname, 'images')));
-
-// Iniciar o servidor
 
 
 const PORT = process.env.PORT || 5000;
