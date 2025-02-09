@@ -7,9 +7,14 @@ const app = express();
 
 // Helmet e CORS
 app.use(helmet());
-app.use(cors({
-  origin: 'https://espiafacil.com.br', // Aqui você coloca o URL do seu front-end
-}));
+const corsOptions = {
+  origin: 'https://espiafacil.com.br', // Permite apenas esse domínio
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Permite os métodos HTTP necessários
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-rapidapi-key'], // Permite esses headers
+  credentials: true, // Permite cookies, se necessário
+};
+
+app.use(cors(corsOptions));
 
 // Rota da API para buscar detalhes do usuário do Instagram
 app.get("/api/user/:username", async (req, res) => {
