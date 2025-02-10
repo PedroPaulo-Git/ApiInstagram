@@ -144,6 +144,86 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
   }
 });
 
+
+
+// 🔹 Proxy para buscar Highlights e a primeira imagem do destaque
+app.get("/api/instagram-highlights/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    console.log(`🔍 Buscando highlights para: ${username}`);
+
+    // 1️⃣ Primeiro Fetch: Pegando Highlights do usuário
+    const highlightsResponse = await axios.post(
+      "https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_highlights.php",
+      `username_or_url=https://www.instagram.com/${username}/`,
+      {
+        headers: {
+          "x-rapidapi-key": "SUA_CHAVE_AQUI",
+          "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    const highlightsData = highlightsResponse.data;
+    console.log("📌 Dados de highlights:", highlightsData);
+
+    if (!highlightsData || highlightsData.length === 0) {
+      return res.status(404).json({ message: "Nenhum highlight encontrado." });
+    }
+
+    // Pegando o primeiro highlight ID
+    const highlightId = highlightsData[0].node.id;
+    console.log(`🎯 Highlight ID obtido: ${highlightId}`);
+
+    // 2️⃣ Segundo Fetch: Pegando histórias do primeiro Highlight
+    const storiesResponse = await axios.post(
+      "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
+      `highlight_id=${encodeURIComponent(highlightId)}`,
+      {
+        headers: {
+          "x-rapidapi-key": "SUA_CHAVE_AQUI",
+          "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    const storiesData = storiesResponse.data;
+    console.log("📸 Stories Data:", storiesData);
+
+    if (!storiesData.items || storiesData.items.length === 0) {
+      return res.status(404).json({ message: "Nenhuma história encontrada." });
+    }
+
+    // Pegando a primeira imagem do primeiro highlight
+    const thumbnailUrl = storiesData.items[0].img_versions2.candidates[0].url;
+
+    console.log("🔗 URL da Thumbnail:", thumbnailUrl);
+
+    // 3️⃣ Fazer o download da imagem e converter para Base64
+    const imageResponse = await axios.get(thumbnailUrl, {
+      responseType: "arraybuffer",
+    });
+
+    const imageBuffer = Buffer.from(imageResponse.data, "binary");
+    const imageBase64 = imageBuffer.toString("base64");
+    const contentType = imageResponse.headers["content-type"];
+    const base64Image = `data:${contentType};base64,${imageBase64}`;
+
+    res.json({
+      highlightId,
+      thumbnailBase64: base64Image,
+    });
+  } catch (error) {
+    console.error("❌ Erro ao buscar highlights:", error);
+    res.status(500).json({ message: "Erro ao obter highlights" });
+  }
+});
+
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
