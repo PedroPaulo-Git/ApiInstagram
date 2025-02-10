@@ -159,7 +159,7 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       `username_or_url=https://www.instagram.com/${username}/`,
       {
         headers: {
-          "x-rapidapi-key": "SUA_CHAVE_AQUI",
+          "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
           "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -183,7 +183,7 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       `highlight_id=${encodeURIComponent(highlightId)}`,
       {
         headers: {
-          "x-rapidapi-key": "SUA_CHAVE_AQUI",
+          "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
           "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
           "Content-Type": "application/x-www-form-urlencoded",
         },
