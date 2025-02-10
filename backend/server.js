@@ -169,9 +169,10 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     const highlightsData = highlightsResponse.data;
     console.log("📌 Dados de highlights:", highlightsData);
 
-    if (!highlightsData || highlightsData.length === 0) {
+    if (!highlightsData || !highlightsData[0] || !highlightsData[0].node) {
       return res.status(404).json({ message: "Nenhum highlight encontrado." });
     }
+
 
     // Pegando o primeiro highlight ID
     const highlightId = highlightsData[0].node.id;
