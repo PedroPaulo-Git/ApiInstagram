@@ -15,16 +15,16 @@ app.use(
   })
 );
 //GET LOCALIZATION
-app.get("/api/location", async (req, res) => {
-  try {
-    const response = await axios.get("https://ipinfo.io/json?token=e40c53e27a59ce");
-    res.json(response.data);
-    console.log(response.data)
-  } catch (error) {
-    console.error("Erro ao buscar localização:", error);
-    res.status(500).json({ message: "Erro ao obter localização" });
-  }
-});
+// app.get("/api/location", async (req, res) => {
+//   try {
+//     const response = await axios.get("https://ipinfo.io/json?token=e40c53e27a59ce");
+//     res.json(response.data);
+//     console.log(response.data)
+//   } catch (error) {
+//     console.error("Erro ao buscar localização:", error);
+//     res.status(500).json({ message: "Erro ao obter localização" });
+//   }
+// });
 
 
 
@@ -148,7 +148,7 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
 
 // 🔹 Proxy para buscar Highlights e a primeira imagem do destaque
 app.get("/api/instagram-highlights/:username", async (req, res) => {
-  const { username } = req.params;
+  const username = req.params.username;
 
   try {
     console.log(`🔍 Buscando highlights para: ${username}`);
@@ -167,7 +167,8 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     );
 
     const highlightsData = highlightsResponse.data;
-    console.log("📌 Dados de highlights:", highlightsData);
+    console.log("📌 Dados de highlights:", JSON.stringify(highlightsData, null, 2));
+
     if (!highlightsData || highlightsData.length === 0 || !highlightsData[0].node) {
       return res.status(404).json({ message: "Nenhum highlight encontrado." });
     }
@@ -178,7 +179,7 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     const highlightId = highlightsData[0].node.id;
     console.log(`🎯 Highlight ID obtido: ${highlightId}`);
 
-    
+
  if (!highlightId) {
       return res.status(404).json({ message: "ID do highlight não encontrado." });
     }
@@ -196,7 +197,8 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     );
 
     const storiesData = storiesResponse.data;
-    console.log("📸 Stories Data:", storiesData);
+    console.log("📸 Stories Data:", JSON.stringify(storiesData, null, 2));
+
 
     if (!storiesData.items || storiesData.items.length === 0) {
       return res.status(404).json({ message: "Nenhuma história encontrada." });
