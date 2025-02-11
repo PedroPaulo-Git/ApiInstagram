@@ -8,7 +8,7 @@ const app = express();
 const cors = require("cors");
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://espiafacil.com.br"],
+    origin: ["http://localhost:3000", "https://espiafacil.com.br","https://espiafacil.info"],
     methods: ["GET"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
