@@ -166,8 +166,6 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       "📌 Dados de highlights:",
       JSON.stringify(highlightsData, null, 2)
     );
-    const cleanHighlightId = highlightId.replace("highlight:", "");
-    console.log("🛠 ID Limpo:", cleanHighlightId);
 
     if (
       !highlightsData ||
@@ -177,16 +175,20 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       return res.status(404).json({ message: "Nenhum highlight encontrado." });
     }
 
-    // Pegando o primeiro highlight ID
+   // Pegando o primeiro highlight ID
+   const highlightId = highlightsData[0].node.id;
+   console.log(`🎯 Highlight ID obtido: ${highlightId}`);
 
-    const highlightId = highlightsData[0].node.id;
-    console.log(`🎯 Highlight ID obtido: ${highlightId}`);
+   if (!highlightId) {
+     return res
+       .status(404)
+       .json({ message: "ID do highlight não encontrado." });
+   }
 
-    if (!highlightId) {
-      return res
-        .status(404)
-        .json({ message: "ID do highlight não encontrado." });
-    }
+   // Removendo "highlight:" do ID
+   const cleanHighlightId = highlightId.replace("highlight:", "");
+   console.log("🛠 ID Limpo:", cleanHighlightId);
+
     // 2️⃣ Segundo Fetch: Pegando histórias do primeiro Highlight
     const storiesResponse = await axios.post(
       "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
