@@ -83,6 +83,7 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     });
   }
 });
+
 // FETCH FOLLOWERS
 app.get("/api/instagram-followers/:username", async (req, res) => {
   const username = req.params.username;
@@ -96,7 +97,7 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
 
   const options = {
     method: "POST",
-    url: "https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_followers.php",
+    url: "https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_followers_v2.php",
     headers: {
       "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
       "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
