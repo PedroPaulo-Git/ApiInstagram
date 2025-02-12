@@ -139,7 +139,6 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
       });
   }
 });
-
 // 🔹 Proxy para buscar Highlights e a primeira imagem do destaque
 app.get("/api/instagram-highlights/:username", async (req, res) => {
   const username = req.params.username;
@@ -160,36 +159,32 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
         },
       }
     );
-
     const highlightsData = highlightsResponse.data;
-    console.log(
-      "📌 Dados de highlights:",
-      JSON.stringify(highlightsData, null, 2)
-    );
+    console.log("📌 Dados de highlights:", JSON.stringify(highlightsData, null, 2));
 
-    if (
-      !highlightsData ||
-      highlightsData.length === 0 ||
-      !highlightsData[0].node
-    ) {
+    // Verificação de erro na resposta
+    if (highlightsData.error) {
+      return res.status(404).json({ message: highlightsData.error });
+    }
+
+    // Verificação para garantir que há highlights e o primeiro highlight possui um nó
+    if (!highlightsData || highlightsData.length === 0 || !highlightsData[0].node) {
       return res.status(404).json({ message: "Nenhum highlight encontrado." });
     }
 
-   // Pegando o primeiro highlight ID
-   const highlightId = highlightsData[0].node.id;
-   console.log(`🎯 Highlight ID obtido: ${highlightId}`);
+    // 2️⃣ Pegando o ID do primeiro highlight
+    const highlightId = highlightsData[0].node.id;
+    console.log(`🎯 Highlight ID obtido: ${highlightId}`);
 
-   if (!highlightId) {
-     return res
-       .status(404)
-       .json({ message: "ID do highlight não encontrado." });
-   }
+    if (!highlightId) {
+      return res.status(404).json({ message: "ID do highlight não encontrado." });
+    }
 
-   // Removendo "highlight:" do ID
-   const cleanHighlightId = highlightId.replace("highlight:", "");
-   console.log("🛠 ID Limpo:", cleanHighlightId);
+    // Remover o prefixo "highlight:" do ID
+    const cleanHighlightId = highlightId.replace("highlight:", "");
+    console.log("🛠 ID Limpo:", cleanHighlightId);
 
-    // 2️⃣ Segundo Fetch: Pegando histórias do primeiro Highlight
+    // 3️⃣ Segundo Fetch: Pegando histórias do primeiro Highlight
     const storiesResponse = await axios.post(
       "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
       `highlight_id=${encodeURIComponent(cleanHighlightId)}`,
@@ -203,11 +198,13 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     );
 
     const storiesData = storiesResponse.data;
+
+    // Verificação se há histórias no highlight
     if (!storiesData.items || storiesData.items.length === 0) {
       return res.status(404).json({ message: "Nenhuma história encontrada." });
     }
 
-    // Pegando a primeira imagem do primeiro highlight
+    // 4️⃣ Pegando a primeira imagem do primeiro highlight
     const thumbnailUrl = storiesData.items[0]?.img_versions2?.candidates?.[0]?.url;
     if (!thumbnailUrl) {
       return res.status(404).json({ message: "Nenhuma imagem encontrada." });
@@ -215,7 +212,7 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
 
     console.log("🔗 URL da Thumbnail:", thumbnailUrl);
 
-    // 3️⃣ Fazer o download da imagem e converter para Base64
+    // 5️⃣ Fazer o download da imagem e converter para Base64
     const imageResponse = await axios.get(thumbnailUrl, {
       responseType: "arraybuffer",
     });
@@ -225,10 +222,12 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     const contentType = imageResponse.headers["content-type"];
     const base64Image = `data:${contentType};base64,${imageBase64}`;
 
+    // 6️⃣ Retornar o ID do highlight e a imagem em Base64
     res.json({
       highlightId: cleanHighlightId,
       thumbnailBase64: base64Image,
     });
+
   } catch (error) {
     console.error("❌ Erro ao buscar highlights:", error.response?.data || error.message);
     res.status(500).json({ message: "Erro ao obter highlights" });
