@@ -31,57 +31,71 @@ app.use(
 // });
 
 // Rota otimizada para buscar informações do perfil
-app.get("/api/instagram-profile-pic/:username", async (req, res) => {
+app.get("/api/instagram-followers/:username", async (req, res) => {
+  const username = req.params.username;
+  console.log(`Buscando seguidores para: ${username}`);
+
+  const encodedParams = new URLSearchParams();
+  encodedParams.set("username_or_url", `https://www.instagram.com/${username}/`);
+  encodedParams.set("data", "followers");
+  encodedParams.set("amount", "6");
+  encodedParams.set("start_from", "0");
+
+  const options = {
+    method: "POST",
+    url: "https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_followers_v2.php",
+    headers: {
+      "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
+      "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    data: encodedParams,
+  };
+
   try {
-    const { username } = req.params;
+    const response = await axios.request(options);
+    console.log("Resposta da API recebida:", response.data);
 
-    // 1. Buscar dados do perfil
-    const profileResponse = await axios.get(
-      `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${username}`,
-      {
-        headers: {
-          "x-rapidapi-key":
-            "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
-          "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-        },
-      }
-    );
+    if (response.data && response.data.users) {
+      const followers = await Promise.all(
+        response.data.users.map(async (f) => {
+          const profilePicUrl = f.profile_pic_url;
+          let base64Image = ""; // Valor padrão (string vazia)
 
-    const profileData = profileResponse.data.data;
-    //console.log(profileData);
-    if (!profileData || !profileData.profile_pic_url_hd) {
-      return res.status(404).json({
-        status: "error",
-        message: "Perfil não encontrado",
-      });
+          try {
+            // Baixar a imagem
+            const imageResponse = await axios.get(profilePicUrl, {
+              responseType: "arraybuffer",
+            });
+
+            // Converter para Base64
+            const imageBase64 = Buffer.from(imageResponse.data, "binary").toString("base64");
+            const contentType = imageResponse.headers["content-type"] || "image/jpeg"; // Fallback
+            base64Image = `data:${contentType};base64,${imageBase64}`;
+          } catch (error) {
+            console.error("Erro ao baixar imagem:", error.message);
+            // Opcional: Definir uma imagem padrão em Base64
+            base64Image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAgAB/1h8JAAAAABJRU5ErkJggg=="; // Imagem placeholder
+          }
+
+          return {
+            username: f.username,
+            full_name: f.full_name,
+            profile_pic_base64: base64Image, // Sempre preenchido
+          };
+        })
+      );
+
+      res.json({ status: "success", followers });
+    } else {
+      console.warn(`Nenhum seguidor encontrado para: ${username}`);
+      res.status(404).json({ status: "error", message: "Nenhum seguidor encontrado." });
     }
-
-    // 2. Buscar a imagem do perfil e converter para base64
-    const imageResponse = await axios({
-      url: profileData.profile_pic_url_hd,
-      method: "GET",
-      responseType: "arraybuffer",
-    });
-
-    const base64Image = Buffer.from(imageResponse.data, "binary").toString(
-      "base64"
-    );
-    const contentType = imageResponse.headers["content-type"];
-    const imageDataUrl = `data:${contentType};base64,${base64Image}`;
-
-    // 3. Retornar os dados do perfil com a Data URL da imagem
-    res.json({
-      status: "success",
-      id: profileData.id,
-      username: profileData.username,
-      full_name: profileData.full_name,
-      profile_pic_url: imageDataUrl,
-    });
   } catch (error) {
-    console.error("Erro no proxy:", error);
+    console.error("Erro ao buscar seguidores:", error.message);
     res.status(500).json({
       status: "error",
-      message: error.response?.data?.message || "Erro interno do servidor",
+      message: "Erro ao buscar seguidores do Instagram.",
     });
   }
 });
@@ -116,29 +130,43 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
     console.log("Resposta da API recebida:", response.data);
 
     if (response.data && response.data.users) {
-      const followers = response.data.users.map((f) => ({
-        username: f.username,
-        full_name: f.full_name,
-        profile_pic_url: f.profile_pic_url,
-      }));
+      // Mapear os seguidores e processar as imagens para Base64
+      const followers = await Promise.all(
+        response.data.users.map(async (f) => {
+          const profilePicUrl = f.profile_pic_url;
+          
+          // Fazer o download da imagem do perfil do seguidor e converter para Base64
+          const imageResponse = await axios.get(profilePicUrl, {
+            responseType: "arraybuffer",
+          });
+
+          const imageBuffer = Buffer.from(imageResponse.data, "binary");
+          const imageBase64 = imageBuffer.toString("base64");
+          const contentType = imageResponse.headers["content-type"];
+          const base64Image = `data:${contentType};base64,${imageBase64}`;
+return {
+  username: f.username,
+  full_name: f.full_name,
+  profile_pic_base64: base64Image, // A imagem em Base64
+};
+
+        })
+      );
 
       res.json({ status: "success", followers });
     } else {
       console.warn(`Nenhum seguidor encontrado para: ${username}`);
-      res
-        .status(404)
-        .json({ status: "error", message: "Nenhum seguidor encontrado." });
+      res.status(404).json({ status: "error", message: "Nenhum seguidor encontrado." });
     }
   } catch (error) {
     console.error("Erro ao buscar seguidores:", error.message);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        message: "Erro ao buscar seguidores do Instagram.",
-      });
+    res.status(500).json({
+      status: "error",
+      message: "Erro ao buscar seguidores do Instagram.",
+    });
   }
 });
+
 // 🔹 Proxy para buscar Highlights e a primeira imagem do destaque
 app.get("/api/instagram-highlights/:username", async (req, res) => {
   const username = req.params.username;
@@ -168,9 +196,10 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     }
 
     // Verificação para garantir que há highlights e o primeiro highlight possui um nó
-    if (!highlightsData || highlightsData.length === 0 || !highlightsData[0].node) {
+    if (!Array.isArray(highlightsData) || highlightsData.length === 0 || !highlightsData[0].node) {
       return res.status(404).json({ message: "Nenhum highlight encontrado." });
     }
+    
 
     // 2️⃣ Pegando o ID do primeiro highlight
     const highlightId = highlightsData[0].node.id;
