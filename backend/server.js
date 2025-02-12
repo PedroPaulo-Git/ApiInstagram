@@ -8,7 +8,11 @@ const app = express();
 const cors = require("cors");
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://espiafacil.com.br","https://espiafacil.info"],
+    origin: [
+      "http://localhost:3000",
+      "https://espiafacil.com.br",
+      "https://espiafacil.info",
+    ],
     methods: ["GET"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
@@ -25,8 +29,6 @@ app.use(
 //     res.status(500).json({ message: "Erro ao obter localização" });
 //   }
 // });
-
-
 
 // Rota otimizada para buscar informações do perfil
 app.get("/api/instagram-profile-pic/:username", async (req, res) => {
@@ -90,7 +92,10 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
   console.log(`Buscando seguidores para: ${username}`);
 
   const encodedParams = new URLSearchParams();
-  encodedParams.set("username_or_url", `https://www.instagram.com/${username}/`);
+  encodedParams.set(
+    "username_or_url",
+    `https://www.instagram.com/${username}/`
+  );
   encodedParams.set("data", "followers");
   encodedParams.set("amount", "6");
   encodedParams.set("start_from", "0");
@@ -120,14 +125,20 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
       res.json({ status: "success", followers });
     } else {
       console.warn(`Nenhum seguidor encontrado para: ${username}`);
-      res.status(404).json({ status: "error", message: "Nenhum seguidor encontrado." });
+      res
+        .status(404)
+        .json({ status: "error", message: "Nenhum seguidor encontrado." });
     }
   } catch (error) {
     console.error("Erro ao buscar seguidores:", error.message);
-    res.status(500).json({ status: "error", message: "Erro ao buscar seguidores do Instagram." });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        message: "Erro ao buscar seguidores do Instagram.",
+      });
   }
 });
-
 
 // 🔹 Proxy para buscar Highlights e a primeira imagem do destaque
 app.get("/api/instagram-highlights/:username", async (req, res) => {
@@ -142,7 +153,8 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       `username_or_url=https://www.instagram.com/${username}/`,
       {
         headers: {
-          "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
+          "x-rapidapi-key":
+            "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
           "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -150,26 +162,35 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     );
 
     const highlightsData = highlightsResponse.data;
-    console.log("📌 Dados de highlights:", JSON.stringify(highlightsData, null, 2));
+    console.log(
+      "📌 Dados de highlights:",
+      JSON.stringify(highlightsData, null, 2)
+    );
+    const cleanHighlightId = highlightId.replace("highlight:", "");
+    console.log("🛠 ID Limpo:", cleanHighlightId);
 
-    if (!highlightsData || highlightsData.length === 0 || !highlightsData[0].node) {
+    if (
+      !highlightsData ||
+      highlightsData.length === 0 ||
+      !highlightsData[0].node
+    ) {
       return res.status(404).json({ message: "Nenhum highlight encontrado." });
     }
 
-
     // Pegando o primeiro highlight ID
-   
+
     const highlightId = highlightsData[0].node.id;
     console.log(`🎯 Highlight ID obtido: ${highlightId}`);
 
-
- if (!highlightId) {
-      return res.status(404).json({ message: "ID do highlight não encontrado." });
+    if (!highlightId) {
+      return res
+        .status(404)
+        .json({ message: "ID do highlight não encontrado." });
     }
     // 2️⃣ Segundo Fetch: Pegando histórias do primeiro Highlight
     const storiesResponse = await axios.post(
       "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
-      `highlight_id=${encodeURIComponent(highlightId)}`,
+      `highlight_id=${encodeURIComponent(cleanHighlightId)}`,
       {
         headers: {
           "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
@@ -180,15 +201,15 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     );
 
     const storiesData = storiesResponse.data;
-    console.log("📸 Stories Data:", JSON.stringify(storiesData, null, 2));
-
-
     if (!storiesData.items || storiesData.items.length === 0) {
       return res.status(404).json({ message: "Nenhuma história encontrada." });
     }
 
     // Pegando a primeira imagem do primeiro highlight
-    const thumbnailUrl = storiesData.items[0].img_versions2.candidates[0].url;
+    const thumbnailUrl = storiesData.items[0]?.img_versions2?.candidates?.[0]?.url;
+    if (!thumbnailUrl) {
+      return res.status(404).json({ message: "Nenhuma imagem encontrada." });
+    }
 
     console.log("🔗 URL da Thumbnail:", thumbnailUrl);
 
@@ -203,16 +224,14 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     const base64Image = `data:${contentType};base64,${imageBase64}`;
 
     res.json({
-      highlightId,
+      highlightId: cleanHighlightId,
       thumbnailBase64: base64Image,
     });
   } catch (error) {
-    console.error("❌ Erro ao buscar highlights:", error);
+    console.error("❌ Erro ao buscar highlights:", error.response?.data || error.message);
     res.status(500).json({ message: "Erro ao obter highlights" });
   }
 });
-
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
