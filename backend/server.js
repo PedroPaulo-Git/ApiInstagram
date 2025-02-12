@@ -83,67 +83,49 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     });
   }
 });
-
 // FETCH FOLLOWERS
 app.get("/api/instagram-followers/:username", async (req, res) => {
   const username = req.params.username;
   console.log(`Buscando seguidores para: ${username}`);
 
-  try {
-    const response = await axios.get(
-      `https://instagram-scraper-api2.p.rapidapi.com/v1/followers?username_or_id_or_url=${username}`,
-      {
-        headers: {
-          "x-rapidapi-key":
-            "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
-          "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-        },
-      }
-    );
+  const encodedParams = new URLSearchParams();
+  encodedParams.set("username_or_url", `https://www.instagram.com/${username}/`);
+  encodedParams.set("data", "followers");
+  encodedParams.set("amount", "6");
+  encodedParams.set("start_from", "0");
 
+  const options = {
+    method: "POST",
+    url: "https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_followers.php",
+    headers: {
+      "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
+      "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    data: encodedParams,
+  };
+
+  try {
+    const response = await axios.request(options);
     console.log("Resposta da API recebida:", response.data);
 
-    if (response.data && response.data.data && response.data.data.items) {
-      // Mapeia os seguidores e prepara a lista para enviar
-      const followers = await Promise.all(
-        response.data.data.items.slice(0, 10).map(async (f) => {
-          // Para cada seguidor, buscamos a imagem do perfil
-          const imageResponse = await axios({
-            url: f.profile_pic_url, // URL da foto do perfil
-            method: "GET",
-            responseType: "arraybuffer", // Fazendo o fetch como array de bytes
-          });
+    if (response.data && response.data.users) {
+      const followers = response.data.users.map((f) => ({
+        username: f.username,
+        full_name: f.full_name,
+        profile_pic_url: f.profile_pic_url,
+      }));
 
-          // Cria um Buffer e converte para um formato que o front-end possa usar
-          const imageBuffer = Buffer.from(imageResponse.data, "binary");
-          const imageBase64 = imageBuffer.toString("base64");
-          const imageUrl = `data:${imageResponse.headers["content-type"]};base64,${imageBase64}`;
-
-          return {
-            username: f.username,
-            full_name: f.full_name,
-            profile_pic_url: imageUrl, // URL da imagem convertida para Base64
-          };
-        })
-      );
-
-      //console.log("Seguidores encontrados:", followers);
       res.json({ status: "success", followers });
     } else {
       console.warn(`Nenhum seguidor encontrado para: ${username}`);
-      res
-        .status(404)
-        .json({ status: "error", message: "Nenhum seguidor encontrado." });
+      res.status(404).json({ status: "error", message: "Nenhum seguidor encontrado." });
     }
   } catch (error) {
     console.error("Erro ao buscar seguidores:", error.message);
-    res.status(500).json({
-      status: "error",
-      message: "Erro ao buscar seguidores do Instagram.",
-    });
+    res.status(500).json({ status: "error", message: "Erro ao buscar seguidores do Instagram." });
   }
 });
-
 
 
 // 🔹 Proxy para buscar Highlights e a primeira imagem do destaque
