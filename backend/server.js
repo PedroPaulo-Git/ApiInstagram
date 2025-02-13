@@ -214,9 +214,11 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
 
     const storiesData = storiesResponse.data;
     console.log("📦 Dados do response ITEMS:", JSON.stringify(storiesResponse.data.items, null, 2));
-
-   console.log("📦 Dados das histórias:", JSON.stringify(storiesData, null, 2));
-
+    console.log("📦 Dados das histórias:", JSON.stringify(storiesResponse.data, null, 2));
+   console.log("📦 Dados das histórias:", JSON.stringify(storiesResponse, null, 2));
+    console.log(storiesData)
+    console.log(storiesData.items[0])
+    console.log(storiesResponse.data.items[0])
     // Verificação se há histórias no highlight
     if (!storiesData?.items || storiesData.items.length === 0) {
       return res.status(404).json({ message: "Nenhuma história encontrada." });
