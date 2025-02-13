@@ -266,8 +266,10 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
         .json({ message: "Dados do Instagram em formato inesperado" });
     }
     // 4️⃣ Pegando a primeira imagem do primeiro highlight
-    const isValidResponse =
-      data?.items?.[0]?.image_versions2?.candidates?.[0]?.url;
+    const isValidResponse = (
+      storiesData?.items?.[0]?.image_versions2?.candidates?.[0]?.url
+    );
+    
     const alternativeThumbnail =
       highlightsData[0].node.cover_media.cropped_image_version.url;
 
