@@ -201,7 +201,8 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     // 3️⃣ Segundo Fetch: Pegando histórias do primeiro Highlight
     const storiesResponse = await axios.post(
       "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
-      `highlight_id=${encodeURIComponent(highlightId)}`,
+      new URLSearchParams({ highlight_id: highlightId }).toString()
+      ,
       {
         headers: {
           "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
