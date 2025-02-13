@@ -149,6 +149,12 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
     }
   } catch (error) {
     console.error("Erro ao buscar seguidores:", error.message);
+    if (error.response && error.response.status === 429) {
+      return res.status(429).json({
+        status: "error",
+        message: "Limite de requisições excedido"
+      });
+    }
     res.status(500).json({
       status: "error",
       message: "Erro ao buscar seguidores do Instagram.",
