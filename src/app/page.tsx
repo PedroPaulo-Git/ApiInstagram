@@ -1,10 +1,9 @@
 "use client";
-import Image from "next/image";
-import DecryptionGif from "../../public/assets/gifdecryption.gif";  
-import Success from "../../public/assets/successblue.gif";
-import noPicture from "../../public/assets/picturenone.png";
-import Logo from "../../public/assets/espia.png";
-
+// import Image from "next/image";
+// import DecryptionGif from "../../public/assets/gifdecryption.gif";
+// import Success from "../../public/assets/successblue.gif";
+// import noPicture from "../../public/assets/picturenone.png";
+// import Logo from "../../public/assets/espia.png";
 import { useState, useEffect } from "react";
 import { GiPadlock } from "react-icons/gi";
 import { IoSearchSharp } from "react-icons/io5";
@@ -26,6 +25,12 @@ interface InstagramUser {
 export default function Home() {
   const [search, setSearch] = useState("");
   const [firstUser, setFirstUser] = useState<InstagramUser | null>(null);
+  // const [firstUser, setFirstUser] = useState<InstagramUser | null>({
+  //   id: '',
+  //   username: '',
+  //   full_name: '',
+  //   profile_pic_url: ''
+  // });
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0); // Percentual de progresso
   // const [showImage, setShowImage] = useState(false); // Para controlar quando mostrar a imagem
@@ -35,6 +40,7 @@ export default function Home() {
   // const [usernameId, setUsernameId] = useState<string | null>(null);
 
   const [decryptionProgress, setDecryptionProgress] = useState(false);
+  const [imageFetch, setImageFetch] = useState(false);
   const [progressDecry, setProgressDecry] = useState(0);
 
   useEffect(() => {
@@ -54,55 +60,52 @@ export default function Home() {
         });
       }, 100); // Atualiza a barra a cada 100ms
     }
- 
+
     if (progressDecry >= 100) {
       setPrimaryProgress(95);
-     
     }
+    // console.log(username);
+    // console.log(firstUser);
   }, [loading, progressDecry]);
+
 
   const handleSearch = async () => {
     if (!search) return;
 
     setLoading(true);
     setFirstUser(null);
-    // setShowImage(false); // Esconde a imagem quando a busca começar
-    setUsername(null);
 
     try {
       const response = await fetch(
-        `https://instagram-scraper-api2.p.rapidapi.com/v1.2/search?search_query=${search}`,
-        {
-          method: "GET",
-          headers: {
-            "x-rapidapi-key":
-              "07f8ca038amshb9b7481a48db93ap121322jsn2d474082fbff",
-            "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-          },
-        }
+        `https://apiinstagram-ieuw.onrender.com/api/instagram-profile-pic/${search}`
       );
-
-      const data = await response.json();
-
-      if (data.data.users.length > 0) {
-        const user = data.data.users[0];
-        setFirstUser({
-          id: user.id,
-          username: user.username,
-          full_name: user.full_name,
-          profile_pic_url: user.profile_pic_url,
-        });
-        // console.log(user);
-        setUsername(user.username);
-        // setUsernameId(user.id);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      // console.log(data);
+      const profileData = await response.json();
+    
+      if (profileData) {  
+        console.log(profileData);
+        
+        setImageFetch(false);
+      }
+
+      setFirstUser({
+        id: profileData.id,
+        username: profileData.username,
+        full_name: profileData.full_name,
+        profile_pic_url: profileData.profile_pic_url, // Já é uma data URL
+      });
+      setUsername(profileData.username);
     } catch (error) {
-      console.error("Erro ao buscar dados:", error);
+      console.error("Erro na busca:", error);
+      alert(`Erro ao buscar perfil. Tente novamente :${error}`);
     } finally {
       setLoading(false);
+      console.log(search);  // Verifique o valor de search
     }
   };
+
   // const [showFirst, setShowFirst] = useState(true);
 
   // useEffect(() => {
@@ -124,18 +127,14 @@ export default function Home() {
         </div>
 
         {progress < 10 && (
-          <Image
-          src={Logo}
-          alt="Loading..."
-          className="w-52 mx-auto "
-        />
+          <img src="/espia.png" alt="Loading..." className="w-52 mx-auto " />
         )}
         {decryptionProgress && progressDecry < 100 && (
           <div className="py-6">
             {progressDecry < 60 && (
               <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
-                <Image
-                  src={DecryptionGif}
+                <img
+                  src="gifdecryption.gif"
                   alt="Loading..."
                   className="w-60 h-44 scale-100 -mt-0 object-cover "
                 />
@@ -143,8 +142,8 @@ export default function Home() {
             )}
             {progressDecry > 60 && progressDecry < 99 && (
               <div className="w-40 h-40 overflow-hidden rounded-full mx-auto">
-                <Image
-                  src={Success}
+                <img
+                  src="/successblue.gif"
                   alt="Loading..."
                   className="w-52 h-52 -mt-6 scale-110 object-cover transition-opacity duration-500 "
                 />
@@ -181,9 +180,7 @@ export default function Home() {
                     onClick={handleSearch}
                     disabled={loading}
                   >
-                  
-                      {loading ? <LoadingSpinnerSmall /> : <IoSearchSharp  />}
-                  
+                    {loading ? <LoadingSpinnerSmall /> : <IoSearchSharp />}
                   </button>
                 </span>
               </div>
@@ -202,7 +199,6 @@ export default function Home() {
           {!decryptionProgress ? (
             <div>
               <div className="flex flex-col items-center p-6 rounded-lg bg-[#232048]">
-             
                 <div className="relative w-[120px] h-[120px] mb-4">
                   <CircularProgressbar
                     value={progress}
@@ -213,10 +209,11 @@ export default function Home() {
                       trailColor: "#3e3e3e", // Cor do fundo
                     })}
                   />
+                  {/* IMAGEM ICON */}
                   {progress < 100 ? (
                     <div className="text-white font-semibold text-xl flex flex-col text-center">
-                      <Image
-                        src={noPicture}
+                      <img
+                        src="/picturenone.png"
                         alt={firstUser.username}
                         width={110}
                         height={110}
@@ -225,13 +222,29 @@ export default function Home() {
                     </div>
                   ) : (
                     <div>
-                      <Image
-                        src={firstUser.profile_pic_url}
-                        alt={firstUser.username}
-                        width={110}
-                        height={110}
-                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
-                      />
+                      {!imageFetch ? (
+                        <div>
+                          <div>
+                            <img
+                              src={firstUser.profile_pic_url}
+                              alt={firstUser.username}
+                              width={110}
+                              height={110}
+                              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <img
+                            src="/picturenone.png"
+                            alt={firstUser.username}
+                            width={110}
+                            height={110}
+                            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -252,26 +265,25 @@ export default function Home() {
                       {firstUser.full_name}
                     </p>
                     <p className="text-gray-400">@{firstUser.username}</p>
-                
-            
-                  <div className="mt-4 flex flex-col space-y-4 text-center">
-                    <h1 className=" text-white font-normal text-lg px-4 py-2 ">
-                      Podemos prosseguir ?
-                    </h1>
-                    <button
-                      className="bg-cyan-600 text-white font-semibold text-md px-4 py-2 rounded-lg hover:bg-cyan-700"
-                      onClick={() => setDecryptionProgress(true)}
-                    >
-                      Continuar, o perfil está correto
-                    </button>
-                    <button
-                      className=" text-white font-semibold px-4 py-2 rounded-lg text-sm"
-                      onClick={() => setFirstUser(null)}
-                    >
-                      Não, quero corrigir
-                    </button>
-                  </div> 
-                   </>
+
+                    <div className="mt-4 flex flex-col space-y-4 text-center">
+                      <h1 className=" text-white font-normal text-lg px-4 py-2 ">
+                        Podemos prosseguir ?
+                      </h1>
+                      <button
+                        className="bg-cyan-600 text-white font-semibold text-md px-4 py-2 rounded-lg hover:bg-cyan-700"
+                        onClick={() => setDecryptionProgress(true)}
+                      >
+                        Continuar, o perfil está correto
+                      </button>
+                      <button
+                        className=" text-white font-semibold px-4 py-2 rounded-lg text-sm"
+                        onClick={() => setFirstUser(null)}
+                      >
+                        Não, quero corrigir
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -290,7 +302,7 @@ export default function Home() {
                 <div>
                   {username && firstUser && (
                     <PreviousContent
-                    setPrimaryProgress={setPrimaryProgress}
+                      setPrimaryProgress={setPrimaryProgress}
                       username={username}
                       firstUser={firstUser}
                       id={firstUser.id}

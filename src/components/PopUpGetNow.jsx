@@ -24,7 +24,7 @@ const PopUpGetNow = ({showPopUpCongratulation,setShowPopUpCongratulation,usernam
         <p className="mt-5">Tenha acesso completo e veja tudo em tempo real</p>
         <a
             class=" z-20 text-white mt-4 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-semibold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.checkoutghost.com/checkout/6c3855d2-da80-4748-873a-9972e747b169"
+            href="https://pay.checkoutghost.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
           >
             <p>ADQUIRA AGORA</p>
           </a>

@@ -218,18 +218,19 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     const storiesData = storiesResponse.data;
 
     // Verificação se há histórias no highlight
-    if (!storiesData.items || storiesData.items.length === 0) {
+    if (!storiesData?.items || storiesData.items.length === 0) {
       return res.status(404).json({ message: "Nenhuma história encontrada." });
     }
+    console.log("📦 Dados das histórias:", JSON.stringify(storiesData, null, 2));
 
     // 4️⃣ Pegando a primeira imagem do primeiro highlight
-    const thumbnailUrl = storiesData.items[0]?.img_versions2?.candidates?.[0]?.url;
+    const thumbnailUrl = storiesData.items[0]?.image_versions2?.candidates?.[0]?.url;
     if (!thumbnailUrl) {
       return res.status(404).json({ message: "Nenhuma imagem encontrada." });
     }
 
     console.log("🔗 URL da Thumbnail:", thumbnailUrl);
-
+    console.log("🔧 Highlight ID Enviado:", cleanHighlightId);
     // 5️⃣ Fazer o download da imagem e converter para Base64
     const imageResponse = await axios.get(thumbnailUrl, {
       responseType: "arraybuffer",

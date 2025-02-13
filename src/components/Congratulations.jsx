@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
+// import Image from "next/image";
 
-import CongratulationsImage from "../../public/assets/congratulations.png";
-import Confetti from "../../public/assets/confetti.png";
-import Champion from "../../public/assets/champion.svg";
-import Verify from "../../public/assets/verify-foreground.svg";
-import Cf from "../../public/assets/cf-logo-1.png";
+// import CongratulationsImage from "../../public/assets/congratulations.png";
+// import Confetti from "../../public/assets/confetti.png";
+// import Champion from "../../public/assets/champion.svg";
+// import Verify from "../../public/assets/verify-foreground.svg";
+// import Cf from "../../public/assets/cf-logo-1.png";
 
-import Feedback1 from "../../public/assets/feedback.png";
-import Feedback2 from "../../public/assets/feedback_1.png";
-import Feedback3 from "../../public/assets/feedback_2.png";
-import Feedback4 from "../../public/assets/feedback_3.png";
-import Feedback5 from "../../public/assets/feedback_4.png";
-
+// import Feedback1 from "../../public/assets/feedback.png";
+// import Feedback2 from "../../public/assets/feedback_1.png";
+// import Feedback3 from "../../public/assets/feedback_2.png";
+// import Feedback4 from "../../public/assets/feedback_3.png";
+// import Feedback5 from "../../public/assets/feedback_4.png";
 
 const Congratulations = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const feedbacks = [Feedback1, Feedback2, Feedback3, Feedback4, Feedback5];
-  const [currentTime, setCurrentTime] = useState(new Date()); // Hora atual
+  const feedbacks = [
+    "/feedback.png",
+    "/feedback_1.png",
+    "/feedback_2.png",
+    "/feedback_3.png",
+    "/feedback_4.png",
+  ];
+
+  //const [currentTime, setCurrentTime] = useState(new Date()); // Hora atual
   const [timeLeft, setTimeLeft] = useState({
     hours: 8,
     minutes: 0,
@@ -83,11 +89,21 @@ const Congratulations = () => {
     return () => clearInterval(interval); // Limpa o intervalo quando o componente for desmontado
   }, []);
 
+  fetch('/config.json')
+  .then(response => response.json())
+  .then(data => {
+    document.getElementById('original-price').textContent = `de R$ ${data.originalPrice} por:`;
+    document.getElementById('discount-price').innerHTML = `<b class="text-[#5468FF] text-5xl">R$</b>${data.discountPrice.toFixed(2)}`;
+    document.getElementById('discount-percentage').textContent = `${data.discountPercentage}% off`;
+  })
+  .catch(error => console.error('Erro ao carregar o config.json:', error));
+
+
   return (
     <div className="flex flex-col text-white ">
       <div className="absolute left-1/2 -translate-x-1/2 max-w-lg w-[90%] sm:w-80 ">
-        <Image
-          src={CongratulationsImage}
+        <img
+          src="/congratulations.png"
           className="w-full object-contain mx-auto -mb-24"
         />
         <div className="text-center">
@@ -101,14 +117,14 @@ const Congratulations = () => {
         </div>
       </div>
       <div className="confetti -mt-10">
-        <Image src={Confetti} className="w-full h-64 object-cover " />
-        <Image src={Confetti} className="w-full h-64 object-cover " />
+        <img src="/confetti.png" className="w-full h-64 object-cover " />
+        <img src="/confetti.png" className="w-full h-64 object-cover " />
       </div>
       {/* LIST */}
       <div className="flex flex-col gap-4 mt-10">
         <div className="relative flex items-center gap-3 shadow-sm rounded-xl py-[15px] px-[15px] bg-[#272445]">
-          <Image
-            src={Champion}
+          <img
+            src="/champion.svg"
             alt="Ícone"
             width={40}
             height={40}
@@ -118,8 +134,8 @@ const Congratulations = () => {
         </div>
 
         <div className="relative flex items-center gap-3 shadow-sm rounded-xl py-[15px] px-[15px] bg-[#272445]">
-          <Image
-            src={Champion}
+          <img
+            src="/champion.svg"
             alt="Ícone"
             width={40}
             height={40}
@@ -129,8 +145,8 @@ const Congratulations = () => {
         </div>
 
         <div className="relative flex items-center gap-3 shadow-sm rounded-xl py-[15px] px-[15px] bg-[#272445]">
-          <Image
-            src={Champion}
+          <img
+            src="/champion.svg"
             alt="Ícone"
             width={40}
             height={40}
@@ -146,8 +162,8 @@ const Congratulations = () => {
           <div className="absolute bg-red-600 text-white right-4 -top-3 inline-flex items-center rounded-full border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80 px-2.5 py-0.5 text-xs">
             Novidade
           </div>
-          <Image
-            src={Verify}
+          <img
+            src="/verify-foreground.svg"
             alt="Ícone"
             width={40}
             height={40}
@@ -159,8 +175,8 @@ const Congratulations = () => {
         </div>
 
         <div className="relative flex items-center gap-3 shadow-sm rounded-xl py-[15px] px-[15px] bg-[#272445]">
-          <Image
-            src={Champion}
+          <img
+            src="/champion.svg"
             alt="Ícone"
             width={40}
             height={40}
@@ -170,8 +186,8 @@ const Congratulations = () => {
         </div>
 
         <div className="relative flex items-center gap-3 shadow-sm rounded-xl py-[15px] px-[15px] bg-[#272445]">
-          <Image
-            src={Champion}
+          <img
+            src="/champion.svg"
             alt="Ícone"
             width={40}
             height={40}
@@ -197,7 +213,11 @@ const Congratulations = () => {
           className="absolute -top-8 left-1/2 transform -translate-x-1/2 border-[#85C763] border-[12px] 
   rounded-full flex items-center justify-center size-16"
         >
-          <Image src={Cf} alt="Close Friends Logo" className="w-12 h-12" />
+          <img
+            src="/cf-logo-1.png"
+            alt="Close Friends Logo"
+            className="w-12 h-12"
+          />
         </div>
 
         {/* Título */}
@@ -247,7 +267,7 @@ const Congratulations = () => {
               aria-roledescription="slide"
               className="min-w-0 shrink-0 grow-0 pl-4 basis-full"
             >
-              <Image
+              <img
                 src={feedback}
                 width={300}
                 height={150}
@@ -302,13 +322,22 @@ const Congratulations = () => {
         </p>
 
         <div class="flex-col flex items-center relative">
-          <small class="text-center text-base font-bold text-[#FF7C83] line-through">
-            de R$ 166 por:
+          <small
+            id="original-price"
+            class="text-center text-base font-bold text-[#FF7C83] line-through"
+          >
+            de R$ 80 por:
           </small>
-          <h2 class="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold">
-            <b class="text-[#5468FF] text-5xl">R$</b>49.90
+          <h2
+            id="discount-price"
+            class="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold"
+          >
+            <b class="text-[#5468FF] text-5xl">R$</b>37.90
           </h2>
-          <div class="absolute -left-2 top-12 inline-flex items-center rounded-xl border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-[#FF2733] text-primary-foreground mb-3">
+          <div
+            id="discount-percentage"
+            class="absolute -left-2 top-12 inline-flex items-center rounded-xl border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-[#FF2733] text-primary-foreground mb-3"
+          >
             70% off
           </div>
         </div>
@@ -316,7 +345,7 @@ const Congratulations = () => {
         <div class="w-full bottom-2 mt-5 flex justify-center items-center ">
           <a
             class=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.checkoutghost.com/checkout/6c3855d2-da80-4748-873a-9972e747b169"
+            href="https://pay.checkoutghost.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
           >
             <p>Acessar Agora</p>
           </a>
