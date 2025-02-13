@@ -212,7 +212,7 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     );
 
     const storiesData = storiesResponse.data;
-    console.log("📦 Dados do response:", JSON.stringify(storiesResponse, null, 2));
+    console.log("📦 Dados do response ITEMS:", JSON.stringify(storiesResponse.data.items, null, 2));
 
    console.log("📦 Dados das histórias:", JSON.stringify(storiesData, null, 2));
 
