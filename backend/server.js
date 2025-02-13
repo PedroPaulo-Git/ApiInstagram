@@ -198,14 +198,10 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       return res.status(404).json({ message: "ID do highlight não encontrado." });
     }
 
-    // Remover o prefixo "highlight:" do ID
-    const cleanHighlightId = highlightId.replace("highlight:", "");
-    console.log("🛠 ID Limpo:", cleanHighlightId);
-
     // 3️⃣ Segundo Fetch: Pegando histórias do primeiro Highlight
     const storiesResponse = await axios.post(
       "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
-      `highlight_id=${encodeURIComponent(cleanHighlightId)}`,
+      `highlight_id=${encodeURIComponent(highlightId)}`,
       {
         headers: {
           "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
