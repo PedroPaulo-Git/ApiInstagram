@@ -293,6 +293,7 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     // 6️⃣ Retornar o ID do highlight e a imagem em Base64
     
     res.json({
+      status: "success",
       highlightId: highlightId,
       thumbnailBase64: base64Image,
     });
