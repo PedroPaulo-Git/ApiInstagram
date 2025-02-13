@@ -219,24 +219,18 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     );
 
     const storiesData = storiesResponse.data;
-    console.log("📦 Dados do response ITEMS:", JSON.stringify(storiesResponse.data.items, null, 2));
-    console.log("📦 Dados das histórias:", JSON.stringify(storiesResponse.data, null, 2));
-   console.log("📦 Dados das histórias:", JSON.stringify(storiesResponse, null, 2));
-    console.log(storiesData)
-    console.log(storiesData.items[0])
-    console.log(storiesResponse.data.items[0])
-    // Verificação se há histórias no highlight
-    if (!storiesData?.items || storiesData.items.length === 0) {
-      return res.status(404).json({ message: "Nenhuma história encontrada." });
-    }
- 
+    console.log("📦 Dados do response ITEMS:", JSON.stringify(storiesResponse.data.items.image_versions2.candidates[0].url, null, 2));
+    console.log(storiesData.items)
+   // 🔍 Verificação PROFUNDA dos dados
+   if (!storiesData?.items?.[0]?.image_versions2?.candidates?.[0]?.url) {
+    console.error("Estrutura de dados inválida:", storiesData);
+    return res.status(502).json({ message: "Dados do Instagram em formato inesperado" });
+  }
     // 4️⃣ Pegando a primeira imagem do primeiro highlight
-    const thumbnailUrl = storiesData.items[0]?.image_versions2?.candidates?.[0]?.url;
-    if (!thumbnailUrl) {
-      return res.status(404).json({ message: "Nenhuma imagem encontrada." });
-    }
+     // ✅ Acesso CORRETO aos dados
+     const thumbnailUrl = storiesData.items[0].image_versions2.candidates[0].url;
+     console.log("🔗 URL válida:", thumbnailUrl);
 
-    console.log("🔗 URL da Thumbnail:", thumbnailUrl);
     console.log("🔧 Highlight ID Enviado:", highlightId);
     // 5️⃣ Fazer o download da imagem e converter para Base64
     const imageResponse = await axios.get(thumbnailUrl, {
@@ -255,8 +249,11 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Erro ao buscar highlights:", error.response?.data || error.message);
-    res.status(500).json({ message: "Erro ao obter highlights" });
+    console.error("❌ Erro detalhado:", error.stack); // Log completo do erro
+    res.status(500).json({ 
+      message: "Falha crítica no servidor",
+      error: error.message 
+    });
   }
 });
 
