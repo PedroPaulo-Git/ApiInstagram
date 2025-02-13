@@ -92,7 +92,10 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
   console.log(`Buscando seguidores para: ${username}`);
 
   const encodedParams = new URLSearchParams();
-  encodedParams.set("username_or_url", `https://www.instagram.com/${username}/`);
+  encodedParams.set(
+    "username_or_url",
+    `https://www.instagram.com/${username}/`
+  );
   encodedParams.set("data", "followers");
   encodedParams.set("amount", "6");
   encodedParams.set("start_from", "0");
@@ -125,13 +128,18 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
             });
 
             // Converter para Base64
-            const imageBase64 = Buffer.from(imageResponse.data, "binary").toString("base64");
-            const contentType = imageResponse.headers["content-type"] || "image/jpeg"; // Fallback
+            const imageBase64 = Buffer.from(
+              imageResponse.data,
+              "binary"
+            ).toString("base64");
+            const contentType =
+              imageResponse.headers["content-type"] || "image/jpeg"; // Fallback
             base64Image = `data:${contentType};base64,${imageBase64}`;
           } catch (error) {
             console.error("Erro ao baixar imagem:", error.message);
             // Opcional: Definir uma imagem padrão em Base64
-            base64Image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAgAB/1h8JAAAAABJRU5ErkJggg=="; // Imagem placeholder
+            base64Image =
+              "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAgAB/1h8JAAAAABJRU5ErkJggg=="; // Imagem placeholder
           }
 
           return {
@@ -145,14 +153,16 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
       res.json({ status: "success", followers });
     } else {
       console.warn(`Nenhum seguidor encontrado para: ${username}`);
-      res.status(404).json({ status: "error", message: "Nenhum seguidor encontrado." });
+      res
+        .status(404)
+        .json({ status: "error", message: "Nenhum seguidor encontrado." });
     }
   } catch (error) {
     console.error("Erro ao buscar seguidores:", error.message);
     if (error.response && error.response.status === 429) {
       return res.status(429).json({
         status: "error",
-        message: "Limite de requisições excedido"
+        message: "Limite de requisições excedido",
       });
     }
     res.status(500).json({
@@ -183,7 +193,10 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       }
     );
     const highlightsData = highlightsResponse.data;
-    console.log("📌 Dados de highlights:", JSON.stringify(highlightsData, null, 2));
+    console.log(
+      "📌 Dados de highlights:",
+      JSON.stringify(highlightsData, null, 2)
+    );
 
     // Verificação de erro na resposta
     if (highlightsData.error) {
@@ -191,27 +204,32 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     }
 
     // Verificação para garantir que há highlights e o primeiro highlight possui um nó
-    if (!Array.isArray(highlightsData) || highlightsData.length === 0 || !highlightsData[0].node) {
+    if (
+      !Array.isArray(highlightsData) ||
+      highlightsData.length === 0 ||
+      !highlightsData[0].node
+    ) {
       return res.status(404).json({ message: "Nenhum highlight encontrado." });
     }
-    
 
     // 2️⃣ Pegando o ID do primeiro highlight
     const highlightId = highlightsData[0].node.id;
     console.log(`🎯 Highlight ID obtido: ${highlightId}`);
 
     if (!highlightId) {
-      return res.status(404).json({ message: "ID do highlight não encontrado." });
+      return res
+        .status(404)
+        .json({ message: "ID do highlight não encontrado." });
     }
 
     // 3️⃣ Segundo Fetch: Pegando histórias do primeiro Highlight
     const storiesResponse = await axios.post(
       "https://instagram-scraper-stable-api.p.rapidapi.com/get_highlights_stories.php",
-      new URLSearchParams({ highlight_id: highlightId }).toString()
-      ,
+      new URLSearchParams({ highlight_id: highlightId }).toString(),
       {
         headers: {
-          "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
+          "x-rapidapi-key":
+            "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
           "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -219,24 +237,45 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
     );
 
     const storiesData = storiesResponse.data;
-    console.log("📦 Dados do response ITEMS:", JSON.stringify(storiesResponse.data.items.image_versions2.candidates[0].url, null, 2));
-    console.log(storiesData.items)
-   // 🔍 Verificação PROFUNDA dos dados
-   if (!storiesData?.items?.[0]?.image_versions2?.candidates?.[0]?.url) {
-    console.error("Estrutura de dados inválida:", storiesData);
-    return res.status(502).json({ message: "Dados do Instagram em formato inesperado" });
-  }
-    // 4️⃣ Pegando a primeira imagem do primeiro highlight
-    const isValidResponse = (
-      data?.items?.[0]?.image_versions2?.candidates?.[0]?.url
+    console.log(
+      "📦 Dados do primeiro response ITEMS:",
+      JSON.stringify(
+        storiesResponse.data.items[0].image_versions2.candidates[0].url,
+        null,
+        2
+      )      
     );
-    const alternativeThumbnail = highlightsData[0].node.cover_media.cropped_image_version.url;
-   
-    const thumbnailUrl = isValidResponse 
-  ? storiesData.items[0].image_versions2.candidates[0].url
-  : alternativeThumbnail;
-  
-     console.log("🔗 URL válida:", thumbnailUrl);
+    
+    if (!storiesData.items || storiesData.items.length === 0) {
+      console.error("Nenhum item encontrado nos stories.");
+      return res.status(404).json({ message: "Nenhuma história encontrada." });
+    }
+    
+    const firstStory = storiesData.items[0];
+    
+    if (!firstStory.image_versions2?.candidates?.[0]?.url) {
+      console.error("Nenhuma imagem encontrada para o primeiro story.");
+      return res.status(502).json({ message: "Dados inesperados da API do Instagram" });
+    }
+    console.log(storiesData.items);
+    // 🔍 Verificação PROFUNDA dos dados
+    if (!storiesData?.items?.[0]?.image_versions2?.candidates?.[0]?.url) {
+      console.error("Estrutura de dados inválida:", storiesData);
+      return res
+        .status(502)
+        .json({ message: "Dados do Instagram em formato inesperado" });
+    }
+    // 4️⃣ Pegando a primeira imagem do primeiro highlight
+    const isValidResponse =
+      data?.items?.[0]?.image_versions2?.candidates?.[0]?.url;
+    const alternativeThumbnail =
+      highlightsData[0].node.cover_media.cropped_image_version.url;
+
+    const thumbnailUrl = isValidResponse
+      ? storiesData.items[0].image_versions2.candidates[0].url
+      : alternativeThumbnail;
+
+    console.log("🔗 URL válida:", thumbnailUrl);
 
     console.log("🔧 Highlight ID Enviado:", highlightId);
     // 5️⃣ Fazer o download da imagem e converter para Base64
@@ -254,12 +293,11 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       highlightId: highlightId,
       thumbnailBase64: base64Image,
     });
-
   } catch (error) {
     console.error("❌ Erro detalhado:", error.stack); // Log completo do erro
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Falha crítica no servidor",
-      error: error.message 
+      error: error.message,
     });
   }
 });
