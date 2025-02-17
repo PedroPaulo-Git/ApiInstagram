@@ -30,26 +30,26 @@ app.use(
 //   }
 // });
 
-// Rota otimizada para buscar informações do perfil
 app.get("/api/instagram-profile-pic/:username", async (req, res) => {
   try {
     const { username } = req.params;
 
-    // 1. Buscar dados do perfil
-    const profileResponse = await axios.get(
-      `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${username}`,
+    // 1. Buscar dados do perfil usando a nova API
+    const profileResponse = await axios.post(
+      'https://instagram-scraper-stable-api.p.rapidapi.com/ig_get_fb_profile_v3.php',
+      `username_or_url=${username}`,
       {
         headers: {
-          "x-rapidapi-key":
-            "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
-          "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-        },
+          "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
+          "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
       }
     );
 
-    const profileData = profileResponse.data.data;
-    //console.log(profileData);
-    if (!profileData || !profileData.profile_pic_url_hd) {
+    const profileData = profileResponse.data;
+    
+    if (!profileData || !profileData.hd_profile_pic_url_info?.url) {
       return res.status(404).json({
         status: "error",
         message: "Perfil não encontrado",
@@ -58,14 +58,12 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
 
     // 2. Buscar a imagem do perfil e converter para base64
     const imageResponse = await axios({
-      url: profileData.profile_pic_url_hd,
+      url: profileData.hd_profile_pic_url_info.url,
       method: "GET",
       responseType: "arraybuffer",
     });
 
-    const base64Image = Buffer.from(imageResponse.data, "binary").toString(
-      "base64"
-    );
+    const base64Image = Buffer.from(imageResponse.data, "binary").toString("base64");
     const contentType = imageResponse.headers["content-type"];
     const imageDataUrl = `data:${contentType};base64,${base64Image}`;
 
@@ -85,6 +83,8 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     });
   }
 });
+
+
 
 // FETCH FOLLOWERS
 app.get("/api/instagram-followers/:username", async (req, res) => {
