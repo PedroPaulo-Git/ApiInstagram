@@ -35,9 +35,27 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
     const { username } = req.params;
 
     // 1. Buscar dados do perfil usando a nova API
+
+
+
+    //V3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    // const profileResponse = await axios.post(
+    //   'https://instagram-scraper-stable-api.p.rapidapi.com/ig_get_fb_profile_v3.php',
+    //   `username_or_url=${username}`,
+    //   {
+    //     headers: {
+    //       "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
+    //       "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+    //       "Content-Type": "application/x-www-form-urlencoded"
+    //     }
+    //   }
+    // );
+
+    
     const profileResponse = await axios.post(
-      'https://instagram-scraper-stable-api.p.rapidapi.com/ig_get_fb_profile_v3.php',
-      `username_or_url=${username}`,
+      'https://instagram-scraper-stable-api.p.rapidapi.com/ig_get_fb_profile.php', // API original
+      `username_or_url=${username}&data=basic`, // Incluindo 'data=basic'
       {
         headers: {
           "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
@@ -46,6 +64,7 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
         }
       }
     );
+    
 
     const profileData = profileResponse.data;
     
