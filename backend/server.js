@@ -54,7 +54,7 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
 
     
     const profileResponse = await axios.post(
-      'https://instagram-scraper-stable-api.p.rapidapi.com/ig_get_fb_profile.php', // API original
+      'https://instagram-scraper-stable-api.p.rapidapi.com/ig_get_fb_profile.php ', // API original
       `username_or_url=${username}&data=basic`, // Incluindo 'data=basic'
       {
         headers: {
