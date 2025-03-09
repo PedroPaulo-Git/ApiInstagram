@@ -23,8 +23,8 @@ const PopUpGetNow = ({showPopUpCongratulation,setShowPopUpCongratulation,usernam
         <p className="p-2 bg-[#344356] rounded-2xl text-white">Se você sair dessa página você corre o risco do investigado ser notificado.</p>
         <p className="mt-5">Tenha acesso completo e veja tudo em tempo real</p>
         <a
-            class=" z-20 text-white mt-4 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-semibold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.checkoutghost.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
+            className=" z-20 text-white mt-4 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-semibold flex bg-primary rounded-2xl w-full justify-center items-center"
+            href="https://pay.checkoutghostspay.com/checkout/aaac04f1-8277-4aa6-90e5-044fad836ee9"
           >
             <p>ADQUIRA AGORA</p>
           </a>

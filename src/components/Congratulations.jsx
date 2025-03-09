@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 // import Image from "next/image";
-
+import { RiErrorWarningLine } from "react-icons/ri";
 // import CongratulationsImage from "../../public/assets/congratulations.png";
 // import Confetti from "../../public/assets/confetti.png";
 // import Champion from "../../public/assets/champion.svg";
@@ -13,7 +13,7 @@ import React, { useState, useEffect } from "react";
 // import Feedback4 from "../../public/assets/feedback_3.png";
 // import Feedback5 from "../../public/assets/feedback_4.png";
 
-const Congratulations = () => {
+const Congratulations = ({isErro429}) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const feedbacks = [
     "/feedback.png",
@@ -29,6 +29,7 @@ const Congratulations = () => {
     minutes: 0,
     seconds: 0,
   });
+  const [showError429, setShowError429] = useState(false);
   const [vagasData, setVagasData] = useState("");
   useEffect(() => {
     // Função para atualizar o tempo restante
@@ -74,44 +75,85 @@ const Congratulations = () => {
         clearInterval(interval); // Para o timer quando o tempo acabar
       }
     }, 1000);
-
+   
     // Limpa o intervalo quando o componente for desmontado
     return () => clearInterval(interval);
   }, [timeLeft]); // Recalcula sempre que o timeLeft mudar
+  
+  useEffect(() => {
+    if (isErro429) {
+      setShowError429(true);
+      const timer = setTimeout(() => {
+        setShowError429(false);
+      }, 3000); // ⏳ Espera 3 segundos antes de exibir o erro
+     
+      return () => clearTimeout(timer); // Limpa o timer ao desmontar
+    } else {
+      setShowError429(false); // Se não for erro 429, esconde o popup
+    }
+  }, [isErro429]);
 
   const nextSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide + 1) % feedbacks.length);
+    setCurrentSlide((prevSlide) => {
+      console.log("Slide atual:", prevSlide, "Próximo slide:", (prevSlide + 1) % feedbacks.length);
+      return (prevSlide + 1) % feedbacks.length;
+    });
   };
+  
 
   // Passa a imagem automaticamente a cada 3 segundos
   useEffect(() => {
-    const interval = setInterval(nextSlide, 3000); // 3000ms = 3 segundos
-    return () => clearInterval(interval); // Limpa o intervalo quando o componente for desmontado
-  }, []);
-
-  fetch('/config.json')
-  .then(response => response.json())
-  .then(data => {
-    document.getElementById('original-price').textContent = `de R$ ${data.originalPrice} por:`;
-    document.getElementById('discount-price').innerHTML = `<b class="text-[#5468FF] text-5xl">R$</b>${data.discountPrice.toFixed(2)}`;
-    document.getElementById('discount-percentage').textContent = `${data.discountPercentage}% off`;
-  })
-  .catch(error => console.error('Erro ao carregar o config.json:', error));
-
-
+    const interval = setInterval(nextSlide, 3000);
+    return () => clearInterval(interval);
+  }, [currentSlide]); // Atualiza corretamente
+  
+  useEffect(() => {
+    fetch('/config.json')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('original-price').textContent = `de R$ ${data.originalPrice} por:`;
+  
+        const discountPrice = document.getElementById('discount-price');
+        discountPrice.innerHTML = ''; // Limpa conteúdo anterior
+  
+        const currency = document.createElement('span');
+        currency.textContent = 'R$';
+        currency.classList.add('text-[#5468FF]', 'text-5xl');
+  
+        const price = document.createTextNode(`${data.discountPrice.toFixed(2)}`);
+  
+        discountPrice.appendChild(currency);
+        discountPrice.appendChild(price);
+        
+        document.getElementById('discount-percentage').textContent = `${data.discountPercentage}% off`;
+      })
+      .catch(error => console.error('Erro ao carregar o config.json:', error));
+  }, []); // Executa apenas uma vez ao montar o componente
+  
   return (
-    <div className="flex flex-col text-white ">
+    <div className="flex flex-col  mb-28 text-white items-center max-w-[450px] w-full px-2 mx-auto overflow-x-hidden ">
+       {showError429 && (
+      <div
+        role="alert"
+        className="rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[400px] mx-10"
+      >
+        <strong className="flex gap-2 items-center font-medium text-red-800 ">
+          <RiErrorWarningLine className="text-2xl" />
+          Você atingiu o limite de busca!
+        </strong>
+      </div>
+    )}
       <div className="absolute left-1/2 -translate-x-1/2 max-w-lg w-[90%] sm:w-80 ">
         <img
           src="/congratulations.png"
           className="w-full object-contain mx-auto -mb-24"
         />
         <div className="text-center">
-          <h1 class="text-3xl font-bold text-[#00D9CD]">
+          <h1 className="text-3xl font-bold text-[#00D9CD]">
             Parabéns seu relatório foi gerado com sucesso!{" "}
           </h1>
-          <h3 class="">
-            <b class="text-[#FF3333]">ATENÇÃO</b> Liberamos apenas um relatório
+          <h3 className="">
+            <b className="text-[#FF3333]">ATENÇÃO</b> Liberamos apenas um relatório
             por dispositivo.
           </h3>
         </div>
@@ -198,7 +240,7 @@ const Congratulations = () => {
           </h3>
         </div>
       </div>
-      <p class="my-8 text-center">
+      <p className="my-8 text-center">
         Nosso sistema é <b>O ÚNICO</b> que te dá informações que nem um
         investigador particular conseguiria com tanta rapidez e precisão. Você
         já parou para pensar quanto custaria ter acesso a essas informações que
@@ -238,12 +280,12 @@ const Congratulations = () => {
       >
         ATENÇÃO
       </div>
-      <p class="mt-8 text-center">
+      <p className="mt-8 text-center">
         O Instagram pode derrubar nossa plataforma a qualquer momento, porque
         estamos te oferecendo um poder <b>REAL</b> que outras pessoas pagam uma
         fortuna para ter.
       </p>
-      <p class="mt-2 text-center font-bold">
+      <p className="mt-2 text-center font-bold">
         Não é brincadeira, é agora ou nunca!
       </p>
       <div
@@ -253,7 +295,7 @@ const Congratulations = () => {
         Feedbacks
       </div>
 
-      <div className="overflow-hidden">
+      <div className=" max-w-[400px]">
         <div
           className="flex transition-transform duration-500 ease-in-out"
           style={{
@@ -267,6 +309,7 @@ const Congratulations = () => {
               aria-roledescription="slide"
               className="min-w-0 shrink-0 grow-0 pl-4 basis-full"
             >
+              
               <img
                 src={feedback}
                 width={300}
@@ -279,16 +322,16 @@ const Congratulations = () => {
         </div>
       </div>
 
-      <p class="my-2 text-center mt-5 text-lg font-semibold">
-        Nossa ferramenta é <b class="text-green-400">limitada</b> ao público,
+      <p className="my-2 text-center mt-5 text-lg font-semibold">
+        Nossa ferramenta é <b className="text-green-400">limitada</b> ao público,
         poucas pessoas conseguem ter acesso...
       </p>
       <div className="py-1 px-2 rounded-lg bg-[#FF2733] text-white font-bold mt-5 text-center">
         {`Apenas 4 vagas liberadas para ${vagasData}`}
       </div>
 
-      <div class="bg-white mb-40 shadow-sm rounded-xl justify-center w-full flex flex-wrap items-start px-5 mt-12 py-6">
-        <h3 class="text-xl mb-3 text-center text-[#344356] font-bold">
+      <div className="bg-white mb-40 shadow-sm rounded-xl justify-center w-full flex flex-wrap items-start px-5 mt-12 py-6">
+        <h3 className="text-xl mb-3 text-center text-[#344356] font-bold">
           Oferta por tempo limitado:
         </h3>
 
@@ -313,39 +356,43 @@ const Congratulations = () => {
           </div>
         </div>
 
-        <p class="text-sm mt-10 mb-3 text-center text-[#344356] font-semibold">
+        <p className="text-sm mt-10 mb-3 text-center text-[#344356] font-semibold">
           Receba{" "}
-          <b class="text-[#5468FF]">
+          <b className="text-[#5468FF]">
             acesso a ferramenta espiã completa e veja informações
           </b>{" "}
           da conta de qualquer pessoa.
         </p>
 
-        <div class="flex-col flex items-center relative">
+        <div className="flex-col flex items-center relative">
           <small
             id="original-price"
-            class="text-center text-base font-bold text-[#FF7C83] line-through"
+            className="text-center text-base font-bold text-[#FF7C83] line-through"
           >
             de R$ 80 por:
           </small>
+          <div>
+
+         
           <h2
             id="discount-price"
-            class="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold"
+            className="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold"
           >
-            <b class="text-[#5468FF] text-5xl">R$</b>37.90
-          </h2>
+            <p className="text-[#5468FF] text-2xl">R$</p>37.90
+          </h2> 
+          </div>
           <div
             id="discount-percentage"
-            class="absolute -left-2 top-12 inline-flex items-center rounded-xl border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-[#FF2733] text-primary-foreground mb-3"
+            className="absolute -left-2 top-12 inline-flex items-center rounded-xl border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-[#FF2733] text-primary-foreground mb-3"
           >
             70% off
           </div>
         </div>
 
-        <div class="w-full bottom-2 mt-5 flex justify-center items-center ">
+        <div className="w-full bottom-2 mt-5 flex justify-center items-center ">
           <a
-            class=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.checkoutghost.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
+            className=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
+            href="https://pay.checkoutghostspay.com/checkout/aaac04f1-8277-4aa6-90e5-044fad836ee9"
           >
             <p>Acessar Agora</p>
           </a>

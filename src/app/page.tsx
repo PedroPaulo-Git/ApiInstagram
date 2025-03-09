@@ -14,6 +14,7 @@ import "react-circular-progressbar/dist/styles.css"; // Para importar o estilo d
 
 import VerticalIcons from "../components/VerticalProgress";
 import PreviousContent from "../components/PreviousContent";
+import Congratulations from "@/components/Congratulations";
 
 interface InstagramUser {
   id: string;
@@ -42,8 +43,10 @@ export default function Home() {
   const [decryptionProgress, setDecryptionProgress] = useState(false);
   const [imageFetch, setImageFetch] = useState(false);
   const [progressDecry, setProgressDecry] = useState(0);
+  const [isErro429,setIsErro429] = useState(false);
 
   useEffect(() => {
+    
     if (loading) {
       setProgress(0);
       // Começa o carregamento da barra
@@ -68,10 +71,16 @@ export default function Home() {
     // console.log(firstUser);
   }, [loading, progressDecry]);
 
-
+  
+  
   const handleSearch = async () => {
     if (!search) return;
-
+    const test429Error = localStorage.getItem("blocked429") === "true";
+    if (test429Error) {
+      setIsErro429(true)
+      return ;// ❌ Se já estiver bloqueado, para a execução aqui
+    }
+    
     setLoading(true);
     setFirstUser(null);
 
@@ -99,13 +108,15 @@ export default function Home() {
       setUsername(profileData.username);
     } catch (error) {
       console.error("Erro na busca:", error);
-      alert(`Erro ao buscar perfil. Tente novamente :${error}`);
+      alert(`Erro ao buscnar perfil. Tente novamente :${error}`);
     } finally {
       setLoading(false);
       console.log(search);  // Verifique o valor de search
     }
   };
-
+  if (isErro429) {
+    return <div><Congratulations isErro429={isErro429} /></div>; // ✅ Agora está correto!
+  }
   // const [showFirst, setShowFirst] = useState(true);
 
   // useEffect(() => {
@@ -300,6 +311,12 @@ export default function Home() {
                 </div>
               ) : (
                 <div>
+                  {isErro429 && (
+                    <div>
+                        <Congratulations
+                        isErro429={isErro429}
+                    />
+                  </div>)}
                   {username && firstUser && (
                     <PreviousContent
                       setPrimaryProgress={setPrimaryProgress}
