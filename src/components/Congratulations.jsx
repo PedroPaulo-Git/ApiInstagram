@@ -392,7 +392,7 @@ const Congratulations = ({isErro429}) => {
         <div className="w-full bottom-2 mt-5 flex justify-center items-center ">
           <a
             className=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.checkoutghostspay.com/checkout/aaac04f1-8277-4aa6-90e5-044fad836ee9"
+            href="https://pay.checkoutghostspay.com/checkout/fdf03c3f-4360-42cb-92a2-2d668127fa9d"
           >
             <p>Acessar Agora</p>
           </a>

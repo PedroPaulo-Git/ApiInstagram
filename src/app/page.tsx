@@ -33,6 +33,7 @@ export default function Home() {
   //   profile_pic_url: ''
   // });
   const [loading, setLoading] = useState(false);
+
   const [progress, setProgress] = useState(0); // Percentual de progresso
   // const [showImage, setShowImage] = useState(false); // Para controlar quando mostrar a imagem
   const [primaryProgress, setPrimaryProgress] = useState(25); // Progresso da barra principal, começa em 25%
@@ -43,59 +44,115 @@ export default function Home() {
   const [decryptionProgress, setDecryptionProgress] = useState(false);
   const [imageFetch, setImageFetch] = useState(false);
   const [progressDecry, setProgressDecry] = useState(0);
-  const [isErro429,setIsErro429] = useState(false);
+  const [isErro429, setIsErro429] = useState(false);
+
+  const [progressAnalys, setProgressAnalys] = useState(0);
+  const [loadingAnalys, setLoadingAnalys] = useState(false);
 
   useEffect(() => {
-    
     if (loading) {
       setProgress(0);
       // Começa o carregamento da barra
       const progressInterval = setInterval(() => {
         setProgress((prev) => {
-          if (prev >= 100) {
+          if (prev >= 100 ) {
             clearInterval(progressInterval);
             // setShowImage(true); // Quando atingir 100%, mostra a imagem
-            setPrimaryProgress(50);
+            //setPrimaryProgress(50);
             // Quando a circular chegar a 100%, a barra principal vai para 50%
+            //setLoadingAnalys(true);
+            //console.log('progress FIRST USER....')
             return 100;
           }
+          
           return prev + 2; // Ajuste para o incremento do progresso
         });
-      }, 100); // Atualiza a barra a cada 100ms
+      }, 1000); // Atualiza a barra a cada 100ms
     }
-
+  
     if (progressDecry >= 100) {
       setPrimaryProgress(95);
     }
+  
+    if (firstUser){
+      setProgress(100);
+      setLoadingAnalys(true);
+     // console.log(loadingAnalys,"-------------------------------")
+     // console.log(loading)
+    }
     // console.log(username);
     // console.log(firstUser);
-  }, [loading, progressDecry]);
+  }, [loading, progressDecry,firstUser]);
 
-  
-  
+
+
+  useEffect(() => {
+    // if (progress >= 100 && !loadingAnalys) {
+    //   setLoadingAnalys(true);
+    //   console.log(" setLoadingAnalys(true)");
+    // }
+
+    if (loadingAnalys) {
+      setProgressAnalys(0)
+//console.log("___________________________!!!!!!!!!!!")
+     // console.log(loadingAnalys)
+     // console.log(progressAnalys)
+     
+      // Começa o carregamento da barra
+      const progressIntervalAnalys = setInterval(() => {
+        setProgressAnalys((prev2) => {
+          if (prev2 >= 100) {
+            clearInterval(progressIntervalAnalys);
+            // setShowImage(true); // Quando atingir 100%, mostra a imagem
+            setPrimaryProgress(50);
+            //console.log('LOADED')
+            //setLoadingAnalys(false);
+            // Quando a circular chegar a 100%, a barra principal vai para 50%
+            return 100;
+          }
+         // console.log(prev2, "PREV 2 ")
+          return prev2 + 3; // Ajuste para o incremento do progresso
+        });
+        
+      }, 100); // Atualiza a barra a cada 100ms
+    }
+    // if (loadingAnalys >= 100){
+    //   setLoadingAnalys(false);
+    // }
+    // console.log("progress 1 ", progress);
+    // console.log("progress primary ", primaryProgress);
+    // console.log("progress ANALYS ", progressAnalys);
+    // console.log("progress DECRY ", progressDecry);
+    // console.log(loadingAnalys);
+  }, [loadingAnalys]);
+
+
+  const handleReset = ()=>{
+    setFirstUser(null)
+    setLoadingAnalys(true)
+  }
   const handleSearch = async () => {
     if (!search) return;
     const test429Error = localStorage.getItem("blocked429") === "true";
     if (test429Error) {
-      setIsErro429(true)
-      return ;// ❌ Se já estiver bloqueado, para a execução aqui
+      setIsErro429(true);
+      return; // ❌ Se já estiver bloqueado, para a execução aqui
     }
-    
+
     setLoading(true);
     setFirstUser(null);
-
+    const formattedSearch = search.replace(/^@/, "");
     try {
       const response = await fetch(
-        `https://apiinstagram-ieuw.onrender.com/api/instagram-profile-pic/${search}`
+        `https://apiinstagram-ieuw.onrender.com/api/instagram-profile-pic/${formattedSearch}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const profileData = await response.json();
-    
-      if (profileData) {  
+
+      if (profileData) {
         console.log(profileData);
-        
         setImageFetch(false);
       }
 
@@ -106,26 +163,22 @@ export default function Home() {
         profile_pic_url: profileData.profile_pic_url, // Já é uma data URL
       });
       setUsername(profileData.username);
+      setLoading(false);
     } catch (error) {
       console.error("Erro na busca:", error);
       alert(`Erro ao buscnar perfil. Tente novamente :${error}`);
     } finally {
-      setLoading(false);
-      console.log(search);  // Verifique o valor de search
+      // setLoading(false);
+      console.log(formattedSearch); // Verifique o valor de search
     }
   };
   if (isErro429) {
-    return <div><Congratulations isErro429={isErro429} /></div>; // ✅ Agora está correto!
+    return (
+      <div>
+        <Congratulations isErro429={isErro429} />
+      </div>
+    ); // ✅ Agora está correto!
   }
-  // const [showFirst, setShowFirst] = useState(true);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setShowFirst((prev) => !prev);
-  //   }, 3000); // Alterna a cada 1 segundo (ajuste o tempo conforme necessário)
-
-  //   return () => clearInterval(interval);
-  // }, []);
 
   return (
     <div className="flex flex-col items-center max-w-[450px] w-full px-8 mx-auto h-svh bg-[#171531] ">
@@ -212,7 +265,7 @@ export default function Home() {
               <div className="flex flex-col items-center p-6 rounded-lg bg-[#232048]">
                 <div className="relative w-[120px] h-[120px] mb-4">
                   <CircularProgressbar
-                    value={progress}
+                    value={progressAnalys}
                     strokeWidth={3}
                     styles={buildStyles({
                       pathColor: "#ffffff", // Cor da barra
@@ -221,7 +274,7 @@ export default function Home() {
                     })}
                   />
                   {/* IMAGEM ICON */}
-                  {progress < 100 ? (
+                  {progressAnalys < 100 ? (
                     <div className="text-white font-semibold text-xl flex flex-col text-center">
                       <img
                         src="/picturenone.png"
@@ -259,7 +312,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                {progress < 100 && (
+                {progressAnalys < 100 && (
                   <div className="text-white font-semibold text-lg w-full flex flex-col text-center">
                     <h1 className="text-2xl my-2">Analisando...</h1>
 
@@ -270,7 +323,7 @@ export default function Home() {
                     </h2>
                   </div>
                 )}
-                {progress === 100 && (
+                {progressAnalys === 100 && (
                   <>
                     <p className="text-white text-lg font-medium">
                       {firstUser.full_name}
@@ -289,7 +342,7 @@ export default function Home() {
                       </button>
                       <button
                         className=" text-white font-semibold px-4 py-2 rounded-lg text-sm"
-                        onClick={() => setFirstUser(null)}
+                        onClick={handleReset}
                       >
                         Não, quero corrigir
                       </button>
@@ -313,10 +366,9 @@ export default function Home() {
                 <div>
                   {isErro429 && (
                     <div>
-                        <Congratulations
-                        isErro429={isErro429}
-                    />
-                  </div>)}
+                      <Congratulations isErro429={isErro429} />
+                    </div>
+                  )}
                   {username && firstUser && (
                     <PreviousContent
                       setPrimaryProgress={setPrimaryProgress}

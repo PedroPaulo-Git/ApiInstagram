@@ -185,127 +185,101 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
 
     getLocation();
   }, [congratulation]);
-
   useEffect(() => {
     const fetchData = async () => {
-      if (isFetching) return; // Impede múltiplas chamadas
+      if (isFetching) return;
       setIsFetching(true);
+  
+      // Verifica bloqueio antes de qualquer operação
+      const isBlocked = localStorage.getItem("blocked429") === "true";
+      if (isBlocked) {
+        setIsErro429(true);
+        setCongratulation(true);
+        setIsFetching(false);
+        return;
+      }
+  
       try {
         setLoading(true);
-        // --- Fetch de seguidores ---
-        // ✅ Primeiro, verifica no localStorage se houve erro 429
-        const isBlocked = localStorage.getItem("blocked429") === "true";
-        if (isBlocked) {
-          setIsErro429(true);
-          setCongratulation(true);
-          return; // ❌ Se já estiver bloqueado, para a execução aqui
-        }
-        let seguidoresCarregados: Follower[] = [];
-        try {
-          console.log("Buscando seguidores para:", username);
-
-          // Fetch dos seguidores do back-end
-
-          const followersResponse = await fetch(
-            `https://apiinstagram-ieuw.onrender.com/api/instagram-followers/${username}`
-          );
-          if (followersResponse.status === 429) {
-            localStorage.setItem("blocked429", "true");
-            setCongratulation(true);
-            setIsErro429(true);
-            return;
-          }
-          if (!followersResponse.ok) {
-            setFollowersError2(true);
-            throw new Error(`Erro HTTP! Status: ${followersResponse.status}`);
-          }
-
-          const followersData = await followersResponse.json();
-          //console.log("Dados de seguidores:", followersData);
-          // Tratar erro 429
-
-          if (
-            followersData.status === "success" &&
-            followersData.followers?.length
-          ) {
-            seguidoresCarregados = followersData.followers.map(
-              (follower: Follower) => {
-                //console.log("Dados do seguidor:", follower); // Verifique todos os campos
-                //console.log("Tipo de profile_pic_base64:", typeof follower.profile_pic_base64); // Verifique o tipo
-                //console.log("Valor de profile_pic_base64:", follower.profile_pic_base64); // Verifique o valor
-
-                return {
-                  username: follower.username,
-                  full_name: follower.full_name,
-                  profile_pic_base64:
-                    follower.profile_pic_base64 || "data:image/png;base64,...", // Fallback
-                };
-              }
+  
+        // Funções de fetch paralelas
+        const fetchFollowers = async () => {
+          try {
+            const response = await fetch(
+              `https://apiinstagram-ieuw.onrender.com/api/instagram-followers/${username}`
             );
-
-            setFollowers(seguidoresCarregados);
-            console.log("👥 Seguidores carregados:", seguidoresCarregados);
-            //console.log("Seguidores no estado:", followersList);
-            //console.log("Primeiro seguidor:", followersData.followers[0]);
-            setFollowersError("seguidores carregados")
-          } else {
-            setFollowersError2(true);
-            console.error("❌ Erro ao buscar seguidores:");
+            
+            if (response.status === 429) {
+              localStorage.setItem("blocked429", "true");
+              setCongratulation(true);
+              setIsErro429(true);
+              return;
+            }
+  
+            if (!response.ok) {
+              setFollowersError2(true);
+              throw new Error(`Erro HTTP! Status: ${response.status}`);
+            }
+  
+            const data = await response.json();
+            if (data.status === "success" && data.followers?.length) {
+              const followers = data.followers.map((follower: Follower) => ({
+                username: follower.username,
+                full_name: follower.full_name,
+                profile_pic_base64: follower.profile_pic_base64 || "data:image/png;base64,...",
+              }));
+              setFollowers(followers);
+              setFollowersError("seguidores carregados");
+            } else {
+              setFollowersError2(true);
+            }
+          } catch (err) {
+            const error = err as Error;
+            if (error.message.includes("429")) {
+              localStorage.setItem("blocked429", "true");
+              setCongratulation(true);
+              setIsErro429(true);
+            }
+            console.error("Erro seguidores:", error);
+            setFollowersError("Erro ao carregar seguidores");
           }
-        } catch (err) {
-          const error = err as Error;
-          if (error.message.includes("429")) {
-            localStorage.setItem("blocked429", "true");
-            setCongratulation(true);
+        };
+  
+        const fetchHighlights = async () => {
+          try {
+            const response = await fetch(
+              `https://apiinstagram-ieuw.onrender.com/api/instagram-highlights/${username}`
+            );
+            
+            if (response.status === 502) throw new Error("Problema temporário com o Instagram");
+            if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
+  
+            const data = await response.json();
+            if (data.status === "success") {
+              setHighlightData({
+                thumbnail: data.thumbnailBase64,
+                highlightId: data.highlightId,
+              });
+            } else {
+              setFollowersError("Nenhum dado encontrado");
+            }
+          } catch (err) {
+            console.error("Erro highlights:", err);
+            setFollowersError("Erro ao carregar destaques");
           }
-          console.error("Erro ao buscar seguidores:", error);
-          setFollowersError("Erro ao carregar seguidores.");
-        }
-
-        // --- Fetch de highlights (primeira etapa: obter o highlight ID) ---
-
-        try {
-          console.log("Buscando dados para:", username);
-
-          const response = await fetch(
-            `https://apiinstagram-ieuw.onrender.com/api/instagram-highlights/${username}`
-          );
-          // 🔍 Verificar status específicos
-          if (response.status === 502) {
-            throw new Error("Problema temporário com o Instagram");
-          }
-          if (!response.ok) {
-            throw new Error(`Erro HTTP! status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          console.log("Dados recebidos:", data);
-
-          if (data.status === "success") {
-            // setFollowers(data.followers || []);
-            setHighlightData({
-              thumbnail: data.thumbnailBase64,
-              highlightId: data.highlightId,
-            });
-            console.log("🎯 Highlights atualizado:", [data.thumbnailBase64]);
-          } else {
-            setFollowersError("Nenhum dado encontrado.");
-          }
-        } catch (err) {
-          console.error("Erro ao buscar dados:", err);
-          setFollowersError("Erro ao carregar dados.");
-        } finally {
-          setLoading(false);
-        }
-      } catch (err) {
-        // setError("Erro ao carregar dados.");
-        console.log(err);
+        };
+  
+        // Executa ambos em paralelo
+        await Promise.allSettled([fetchFollowers(), fetchHighlights()]);
+  
+      } catch (error) {
+        console.error("Erro geral:", error);
       } finally {
         setIsFetching(false);
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, [username]);
 

@@ -12,7 +12,7 @@ export default function VerticalProgressBar({ progress,setProgress }) {
           clearInterval(interval);
           return 100;
         }
-        return oldProgress + 1;
+        return oldProgress + 3;
       });
     }, 100);
    
