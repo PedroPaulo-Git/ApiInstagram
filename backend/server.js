@@ -132,8 +132,19 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
 
   try {
     const response = await axios.request(options);
-    console.log("Resposta da API recebida:", response.data);
+    // console.log("Resposta da API recebida:", response.data);
 
+    if (response.data && response.data.users) {
+      response.data.users.forEach(user => {
+        console.log({
+          username: user.username,
+          full_name: user.full_name,
+          id: user.id,
+          profile_pic_url: user.profile_pic_url
+        });
+      });
+    }
+    
     if (response.data && response.data.users) {
       const followers = await Promise.all(
         response.data.users.map(async (f) => {
