@@ -121,7 +121,7 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
 
   const options = {
     method: "POST",
-    url: "https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_followers_v2.php",
+    url: "https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_followers.php",
     headers: {
       "x-rapidapi-key": "6914148d4emsh72559e87eeaa511p1a0915jsn704c1eaf771f",
       "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
@@ -176,6 +176,7 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
         .status(404)
         .json({ status: "error", message: "Nenhum seguidor encontrado." });
     }
+
   } catch (error) {
     console.error("Erro ao buscar seguidores:", error.message);
     if (error.response && error.response.status === 429) {
@@ -212,10 +213,10 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       }
     );
     const highlightsData = highlightsResponse.data;
-    console.log(
-      "📌 Dados de highlights:",
-      JSON.stringify(highlightsData, null, 2)
-    );
+    // console.log(
+    //   "📌 Dados de highlights:",
+    //   JSON.stringify(highlightsData, null, 2)
+    // );
 
     // Verificação de erro na resposta
     if (highlightsData.error) {
@@ -276,7 +277,7 @@ app.get("/api/instagram-highlights/:username", async (req, res) => {
       console.error("Nenhuma imagem encontrada para o primeiro story.");
       return res.status(502).json({ message: "Dados inesperados da API do Instagram" });
     }
-    console.log(storiesData.items);
+    // console.log(storiesData.items);
     // 🔍 Verificação PROFUNDA dos dados
     if (!storiesData?.items?.[0]?.image_versions2?.candidates?.[0]?.url) {
       console.error("Estrutura de dados inválida:", storiesData);
