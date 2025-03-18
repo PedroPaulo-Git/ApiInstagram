@@ -190,8 +190,9 @@ export default function Home() {
           ></div>
         </div>
 
-        {progress < 10 && (
-          <img src="/espia.png" alt="Loading..." className="w-52 mx-auto " />
+        {!firstUser && (
+          <img src="/espia.png" alt="Loading..." 
+          className="w-52 mx-auto " />
         )}
         {decryptionProgress && progressDecry < 100 && (
           <div className="py-6">

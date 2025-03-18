@@ -111,24 +111,30 @@ const Congratulations = ({isErro429}) => {
     fetch('/config.json')
       .then(response => response.json())
       .then(data => {
-        document.getElementById('original-price').textContent = `de R$ ${data.originalPrice} por:`;
+        document.querySelectorAll('#original-price').forEach((el) => {
+          el.textContent = `de R$ ${data.originalPrice} por:`;
+        });
   
-        const discountPrice = document.getElementById('discount-price');
-        discountPrice.innerHTML = ''; // Limpa conteúdo anterior
+        document.querySelectorAll('#discount-price').forEach((el) => {
+          el.innerHTML = ''; // Limpa conteúdo anterior
   
-        const currency = document.createElement('span');
-        currency.textContent = 'R$';
-        currency.classList.add('text-[#5468FF]', 'text-5xl');
+          const currency = document.createElement('span');
+          currency.textContent = 'R$';
+          currency.classList.add('text-[#5468FF]', 'text-5xl');
   
-        const price = document.createTextNode(`${data.discountPrice.toFixed(2)}`);
+          const price = document.createTextNode(`${data.discountPrice.toFixed(2)}`);
   
-        discountPrice.appendChild(currency);
-        discountPrice.appendChild(price);
-        
-        document.getElementById('discount-percentage').textContent = `${data.discountPercentage}% off`;
+          el.appendChild(currency);
+          el.appendChild(price);
+        });
+  
+        document.querySelectorAll('#discount-percentage').forEach((el) => {
+          el.textContent = `${data.discountPercentage}% off`;
+        });
       })
       .catch(error => console.error('Erro ao carregar o config.json:', error));
-  }, []); // Executa apenas uma vez ao montar o componente
+  }, []);
+  
   
   return (
     <div className="flex flex-col  mb-28 text-white items-center max-w-[450px] w-full px-2 mx-auto overflow-x-hidden ">
@@ -143,12 +149,12 @@ const Congratulations = ({isErro429}) => {
         </strong>
       </div>
     )}
-      <div className="absolute left-1/2 -translate-x-1/2 max-w-lg w-[90%] sm:w-80 ">
+      <div className="absolute left-1/2  -translate-x-1/2 max-w-lg w-[90%] sm:w-80 ">
         <img
           src="/congratulations.png"
-          className="w-full object-contain mx-auto -mb-24"
+          className="w-full object-contain mx-auto -mb-32 -mt-12"
         />
-        <div className="text-center">
+        <div className="text-center ">
           <h1 className="text-3xl font-bold text-[#00D9CD]">
             Parabéns seu relatório foi gerado com sucesso!{" "}
           </h1>
@@ -158,9 +164,78 @@ const Congratulations = ({isErro429}) => {
           </h3>
         </div>
       </div>
-      <div className="confetti -mt-10">
+      <div className="confetti -mt-36">
         <img src="/confetti.png" className="w-full h-64 object-cover " />
         <img src="/confetti.png" className="w-full h-64 object-cover " />
+      </div>
+      <div className="bg-white shadow-sm rounded-xl justify-center w-full flex flex-wrap
+       items-start px-5 py-6">
+        {/* <h3 className="text-xl mb-3 text-center text-[#344356] font-bold">
+          Oferta por tempo limitado:
+        </h3>
+
+        <div className="w-full flex justify-center">
+          <div className="bg-[#FF7C83] rounded-xl mx-2 w-16 py-1 text-center drop-shadow-2xl">
+            <div className="text-4xl font-extrabold mt-1">{timeLeft.hours}</div>
+            <div className="bottom-2 text-center text-xs">horas</div>
+          </div>
+
+          <div className="bg-[#FF7C83] rounded-xl mx-2 w-16 py-1 text-center drop-shadow-2xl">
+            <div className="text-4xl font-extrabold mt-1">
+              {timeLeft.minutes}
+            </div>
+            <div className="bottom-2 text-center text-xs">minutos</div>
+          </div>
+
+          <div className="bg-[#FF7C83] rounded-xl mx-2 w-16 py-1 text-center drop-shadow-2xl">
+            <div className="text-4xl font-extrabold mt-1">
+              {timeLeft.seconds}
+            </div>
+            <div className="bottom-2 text-center text-xs">segundos</div>
+          </div>
+        </div>
+
+        <p className="text-sm mt-10 mb-3 text-center text-[#344356] font-semibold">
+          Receba{" "}
+          <b className="text-[#5468FF]">
+            acesso a ferramenta espiã completa e veja informações
+          </b>{" "}
+          da conta de qualquer pessoa.
+        </p> */}
+
+        <div className="flex-col flex items-center relative">
+          <small
+            id="original-price"
+            className="text-center text-base font-bold text-[#FF7C83] line-through"
+          >
+            de R$ 80 por:
+          </small>
+          <div>
+
+         
+          <h2
+            id="discount-price"
+            className="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold"
+          >
+            <p className="text-[#5468FF] text-2xl">R$</p>37.90
+          </h2> 
+          </div>
+          <div
+            id="discount-percentage"
+            className="absolute -left-2 top-12 inline-flex items-center rounded-xl border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-[#FF2733] text-primary-foreground mb-3"
+          >
+            70% off
+          </div>
+        </div>
+
+        <div className="w-full bottom-2 mt-5 flex justify-center items-center ">
+          <a
+            className=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
+            href="https://pay.ghostpaycheckout.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
+          >
+            <p>Acessar Agora</p>
+          </a>
+        </div>
       </div>
       {/* LIST */}
       <div className="flex flex-col gap-4 mt-10">
@@ -392,7 +467,7 @@ const Congratulations = ({isErro429}) => {
         <div className="w-full bottom-2 mt-5 flex justify-center items-center ">
           <a
             className=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.checkoutghostspay.com/checkout/fdf03c3f-4360-42cb-92a2-2d668127fa9d"
+            href="https://pay.ghostpaycheckout.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
           >
             <p>Acessar Agora</p>
           </a>

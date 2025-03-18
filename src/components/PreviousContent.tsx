@@ -303,18 +303,42 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
       {!congratulation ? (
         <div className="flex flex-col max-w-[450px]  text-white  lg:pl-0 lg:pr-0 ">
           <h1 className="text-4xl mt-8 text-center font-bold">
-            <b className="text-[#5468FF]">Prévia</b> do seu @
+          Essa sessão é apenas a 
+            <b className="text-[#5468FF]"> Prévia </b>  
+            <p className="text-xl pt-4 "> de como será sua experiência com nossa ferramenta. </p>
           </h1>
           <div className="items-center px-6 mx-auto rounded font-bold text-center bg-[#272445] p-5 mt-5">
             Prévia disponível
             <br /> por <b className="text-[#FF5489]">apenas 24h</b>
           </div>
+          <button
+            onClick={handleViewReport}
+            className=" my-10 w-full bg-[#5266FF] p-6 text-xl font-semibold rounded-xl inline-flex items-center justify-center "
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-eye mr-3 size-6"
+            >
+              <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>{" "}
+            Ver relatório completo
+          </button>
           <h3 className="text-2xl mt-5 text-center font-bold">
             Pessoas que ela mais <b className="text-[#5468FF]">interage</b>
           </h3>
 
           {loading ? (
-            <div className="mx-auto mt-8">
+            <div className="mx-auto mt-8 items-center flex flex-col space-y-3">
+              <h1 className="font-medium">Buscando dados do <b className="font-medium text-[#5468FF]">@</b></h1>
               <LoadingSpinner />
             </div>
           ) : followersError === null ? (
@@ -355,7 +379,9 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                     </div>
                   </div>
                 </div>
+                
               </div>
+              
             </>
           ) : (
             <>
@@ -398,6 +424,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                     </li>
                   ))}
                 </ul>
+               
               </div>
             </>
           )}
