@@ -138,9 +138,9 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
       response.data.users.forEach(user => {
         console.log({
           username: user.username,
-          full_name: user.full_name,
+          // full_name: user.full_name,
           id: user.id,
-          profile_pic_url: user.profile_pic_url
+          // profile_pic_url: user.profile_pic_url
         });
       });
     }
