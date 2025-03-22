@@ -735,10 +735,10 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
         <div className="flex flex-col items-start">
           <CongratulationsComponent isErro429={isErro429} />
           {/* <button onClick={()=>setCongratulation(false)}>teste</button> */}
-          {!isErro429 && (
+          {/* {isErro429 && (
             <div
               role="alert"
-              className="rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[80%] mx-10"
+              className="z-20 rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[80%] mx-10"
             >
               <strong className="flex gap-2 items-center font-medium text-red-800 ">
                 {" "}
@@ -746,7 +746,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
                 Você Atingiu o limite de busca !{" "}
               </strong>
             </div>
-          )}
+          )} */}
 
           {showPopUpCongratulation && (
             <PopUpGetNow

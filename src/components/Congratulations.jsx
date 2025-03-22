@@ -157,16 +157,17 @@ const Congratulations = ({ isErro429 }) => {
   return (
     <div className="flex flex-col  mb-28 text-white items-center max-w-[450px] w-full px-2 mx-auto overflow-x-hidden ">
       {showError429 && (
-        <div
-          role="alert"
-          className="z-30 rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[400px] mx-10"
-        >
-          <strong className="flex gap-2 items-center font-medium text-red-800 ">
-            <RiErrorWarningLine className="text-2xl" />
-            Você atingiu o limite de busca!
-          </strong>
-        </div>
-      )}
+            <div
+              role="alert"
+              className="rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[80%] mx-10"
+            >
+              <strong className="flex gap-2 items-center font-medium text-red-800 ">
+                {" "}
+                <RiErrorWarningLine className="text-2xl" />
+                Você Atingiu o limite de busca !{" "}
+              </strong>
+            </div>
+          )}
       <div className="absolute left-1/2  -translate-x-1/2 max-w-lg w-[90%] sm:w-80 ">
         <img
           src="/congratulations.png"
