@@ -15,6 +15,7 @@ import "react-circular-progressbar/dist/styles.css"; // Para importar o estilo d
 import VerticalIcons from "../components/VerticalProgress";
 import PreviousContent from "../components/PreviousContent";
 import Congratulations from "@/components/Congratulations";
+import PopUpFetchSearch from "@/components/PopUpFetchSearch";
 
 interface InstagramUser {
   id: string;
@@ -22,10 +23,24 @@ interface InstagramUser {
   full_name: string;
   profile_pic_url: string;
 }
-
+interface Follower {
+  username: string;
+  full_name: string;
+  profile_pic_base64?: string; // Adicionando o campo opcional para a imagem Base64
+}
 export default function Home() {
   const [search, setSearch] = useState("");
   const [firstUser, setFirstUser] = useState<InstagramUser | null>(null);
+  const [followers, setFollowers] = useState<Follower[]>([]);
+  const [highlightData, setHighlightData] = useState<{
+    thumbnail?: string;
+    highlightId?: string;
+  }>({});
+  const [isFetchingData, setIsFetchingData] = useState(false); // Novo estado de loading
+  const [followersError, setFollowersError] = useState<string | null>(null);
+  const [followersError2, setFollowersError2] = useState<boolean | null>(false);
+  const [congratulation, setCongratulation] = useState<boolean>(false);
+  //const [isErro429, setIsErro429] = useState<boolean>(false);
   // const [firstUser, setFirstUser] = useState<InstagramUser | null>({
   //   id: '',
   //   username: '',
@@ -33,6 +48,7 @@ export default function Home() {
   //   profile_pic_url: ''
   // });
   const [loading, setLoading] = useState(false);
+  const [popUpFetch, setPopUpFetch] = useState(false);
 
   const [progress, setProgress] = useState(0); // Percentual de progresso
   // const [showImage, setShowImage] = useState(false); // Para controlar quando mostrar a imagem
@@ -48,14 +64,153 @@ export default function Home() {
 
   const [progressAnalys, setProgressAnalys] = useState(0);
   const [loadingAnalys, setLoadingAnalys] = useState(false);
+  // const handleViewReport = () => {
+  //   setCongratulation(true);
+  //   setPrimaryProgress(100);
+  //   window.scrollTo({ top: 0 });
+  // };
+  // useEffect(() => {
+    const fetchData = async () => {
+      // fetchData()
+      console.log("Fetching data...")
+      // if (isFetchingData || !username) return;
+      setIsFetchingData(true);
+
+      // Verifica bloqueio antes de qualquer operação
+      const isBlocked = localStorage.getItem("blocked429") === "true";
+      if (isBlocked) {
+        setIsErro429(true);
+        setCongratulation(true);
+        setIsFetchingData(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        // Funções de fetch paralelas
+        const fetchFollowers = async () => {
+          try {
+            const response = await fetch(
+              `https://apiinstagram-ieuw.onrender.com/api/instagram-followers/${username}`
+            );
+            console.log(response)
+            if (response.status === 429) {
+              localStorage.setItem("blocked429", "true");
+              setCongratulation(true);
+              setIsErro429(true);
+              return;
+            }
+
+            if (!response.ok) {
+              setFollowersError2(true);
+              throw new Error(`Erro HTTP! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.status === "success" && data.followers?.length) {
+              const followers = data.followers.map((follower: Follower) => ({
+                username: follower.username,
+                full_name: follower.full_name,
+                profile_pic_base64: follower.profile_pic_base64 || "data:image/png;base64,...",
+              }));
+              setFollowers(followers);
+              setFollowersError("seguidores carregados");
+              console.log(followers)
+            } else {
+              setFollowersError2(true);
+            }
+          } catch (err) {
+            const error = err as Error;
+            if (error.message.includes("429")) {
+              localStorage.setItem("blocked429", "true");
+              setCongratulation(true);
+              setIsErro429(true);
+            }
+            console.error("Erro seguidores:", error);
+            setFollowersError("Erro ao carregar seguidores");
+          }
+        };
+
+        const fetchHighlights = async () => {
+          try {
+            const response = await fetch(
+              `https://apiinstagram-ieuw.onrender.com/api/instagram-highlights/${username}`
+            );
+
+            if (response.status === 502) throw new Error("Problema temporário com o Instagram");
+            if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
+
+            const data = await response.json();
+           
+            if (data.status === "success") {
+              setHighlightData({
+                thumbnail: data.thumbnailBase64,
+                highlightId: data.highlightId,
+              });
+              console.log("Status Highlight :",data.status)
+            } else {
+              setFollowersError("Nenhum dado encontrado");
+            }
+          } catch (err) {
+            console.error("Erro highlights:", err);
+            setFollowersError("Erro ao carregar destaques");
+          }
+        };
+
+        // Executa ambos em paralelo
+        await Promise.allSettled([fetchFollowers(), fetchHighlights()]);
+
+      } catch (error) {
+        console.error("Erro geral:", error);
+      } finally {
+        setIsFetchingData(false);
+        setLoading(false);
+        
+      }
+    };
+
+
+    useEffect(() => {
+      if (username && !isFetchingData) {
+        fetchData();
+      }
+      console.log(search)
+      console.log(username)
+    }, [username]);
+  //  fetchData()
+  // }, [username]);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const testMode = urlParams.get("test") === "1";
+
+    // Modo de teste remove o bloqueio
+    if (testMode) {
+      localStorage.removeItem("blocked429");
+      return;
+    }
+
+    // Verificar se está bloqueado
+    if (localStorage.getItem("blocked429")) {
+      setCongratulation(true);
+    }
+  }, []);
+
+
+
+
+
+
+
+  useEffect(() => {
+    console.log(progress);
     if (loading) {
       setProgress(0);
       // Começa o carregamento da barra
       const progressInterval = setInterval(() => {
         setProgress((prev) => {
-          if (prev >= 100 ) {
+          if (prev >= 100) {
             clearInterval(progressInterval);
             // setShowImage(true); // Quando atingir 100%, mostra a imagem
             //setPrimaryProgress(50);
@@ -64,27 +219,25 @@ export default function Home() {
             //console.log('progress FIRST USER....')
             return 100;
           }
-          
+
           return prev + 2; // Ajuste para o incremento do progresso
         });
       }, 1000); // Atualiza a barra a cada 100ms
     }
-  
+
     if (progressDecry >= 100) {
       setPrimaryProgress(95);
     }
-  
-    if (firstUser){
+
+    if (firstUser) {
       setProgress(100);
       setLoadingAnalys(true);
-     // console.log(loadingAnalys,"-------------------------------")
-     // console.log(loading)
+      // console.log(loadingAnalys,"-------------------------------")
+      // console.log(loading)
     }
     // console.log(username);
     // console.log(firstUser);
-  }, [loading, progressDecry,firstUser]);
-
-
+  }, [loading, progressDecry, firstUser]);
 
   useEffect(() => {
     // if (progress >= 100 && !loadingAnalys) {
@@ -93,11 +246,11 @@ export default function Home() {
     // }
 
     if (loadingAnalys) {
-      setProgressAnalys(0)
-//console.log("___________________________!!!!!!!!!!!")
-     // console.log(loadingAnalys)
-     // console.log(progressAnalys)
-     
+      setProgressAnalys(0);
+      //console.log("___________________________!!!!!!!!!!!")
+      // console.log(loadingAnalys)
+      // console.log(progressAnalys)
+
       // Começa o carregamento da barra
       const progressIntervalAnalys = setInterval(() => {
         setProgressAnalys((prev2) => {
@@ -110,10 +263,9 @@ export default function Home() {
             // Quando a circular chegar a 100%, a barra principal vai para 50%
             return 100;
           }
-         // console.log(prev2, "PREV 2 ")
+          // console.log(prev2, "PREV 2 ")
           return prev2 + 3; // Ajuste para o incremento do progresso
         });
-        
       }, 100); // Atualiza a barra a cada 100ms
     }
     // if (loadingAnalys >= 100){
@@ -126,22 +278,24 @@ export default function Home() {
     // console.log(loadingAnalys);
   }, [loadingAnalys]);
 
-
-  const handleReset = ()=>{
-    setFirstUser(null)
-    setLoadingAnalys(true)
-  }
+  const handleReset = () => {
+    setFirstUser(null);
+    setLoadingAnalys(true);
+  };
   const handleSearch = async () => {
+    
     if (!search) return;
+   
     const test429Error = localStorage.getItem("blocked429") === "true";
     if (test429Error) {
       setIsErro429(true);
       return; // ❌ Se já estiver bloqueado, para a execução aqui
     }
-
+    // fetchData();
     setLoading(true);
     setFirstUser(null);
     const formattedSearch = search.replace(/^@/, "");
+    setUsername(formattedSearch)
     try {
       const response = await fetch(
         `https://apiinstagram-ieuw.onrender.com/api/instagram-profile-pic/${formattedSearch}`
@@ -164,14 +318,22 @@ export default function Home() {
       });
       setUsername(profileData.username);
       setLoading(false);
+      
     } catch (error) {
+      ///////////////////////////////////////////////////// -------------------------------------------------- ERRRO PAARA ARRUMAR
       console.error("Erro na busca:", error);
-      alert(`Erro ao buscnar perfil. Tente novamente :${error}`);
+      setPopUpFetch(true);
+      setTimeout(() => {
+        setPopUpFetch(false);
+      }, 3500);
+      // alert(`Erro ao buscar perfil. Tente novamente :${error}`);
     } finally {
+      setLoading(false);
       // setLoading(false);
       console.log(formattedSearch); // Verifique o valor de search
     }
   };
+
   if (isErro429) {
     return (
       <div>
@@ -181,7 +343,15 @@ export default function Home() {
   }
 
   return (
+    <>
+    {popUpFetch && (
+        <div>
+          <PopUpFetchSearch />
+        </div>
+      )}
     <div className="flex flex-col items-center max-w-[450px] w-full px-8 mx-auto h-svh bg-[#171531] ">
+      
+
       <div className=" w-full max-w-md  my-10 space-y-5">
         <div className="relative w-full max-w-mdh-2 bg-gray-700 rounded-full mx-auto">
           <div
@@ -191,8 +361,7 @@ export default function Home() {
         </div>
 
         {!firstUser && (
-          <img src="/espia.png" alt="Loading..." 
-          className="w-52 mx-auto " />
+          <img src="/espia.png" alt="Loading..." className="w-52 mx-auto " />
         )}
         {decryptionProgress && progressDecry < 100 && (
           <div className="py-6">
@@ -241,7 +410,8 @@ export default function Home() {
                 />
                 <span className="absolute inset-y-0 end-0 grid place-content-center px-3">
                   <button
-                    className="rounded-lg bg-cyan-400 text-black px-4 py-2 hover:bg-cyan-400 disabled:opacity-50"
+                    className="rounded-lg bg-cyan-400 text-black px-4 py-2
+                     hover:bg-cyan-400 disabled:opacity-85"
                     onClick={handleSearch}
                     disabled={loading}
                   >
@@ -372,10 +542,19 @@ export default function Home() {
                   )}
                   {username && firstUser && (
                     <PreviousContent
-                      setPrimaryProgress={setPrimaryProgress}
-                      username={username}
-                      firstUser={firstUser}
-                      id={firstUser.id}
+                    isFetchingData={isFetchingData}
+                    setPrimaryProgress={setPrimaryProgress}
+                    username={username}
+                    firstUser={firstUser}
+                    id={firstUser.id}
+                    followers={followers}
+                    highlightData={highlightData}
+                    congratulation={congratulation}
+                    setCongratulation={setCongratulation}
+                    isErro429={isErro429}
+                    followersError={followersError}
+                    followersError2={followersError2}
+                    //handleViewReport={handleViewReport}
                     />
                   )}
                 </div>
@@ -385,5 +564,6 @@ export default function Home() {
         </div>
       )}
     </div>
+    </>
   );
 }

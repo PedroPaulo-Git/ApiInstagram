@@ -1,20 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
-//import Audiomp3 from '../app/assets/audio.mp3'
-
-// import Direct from "../../public/assets/header-dm.png";  // Corrigido
-// import userDirect from "../../public/assets/profile-m.png";  // Corrigido
-
-// import templateHighlights from "../../public/assets/storiesEdited2.png";  // Corrigido
-// import CloseFriendsStories from "../../public/assets/story_1.png";  // Corrigido
-// import CloseFriendsStories2 from "../../public/assets/story_2.png";  // Corrigido
-// import Close from "../../public/assets/close.png";  // Corrigido
-// import Map from "../../public/assets/map.png";  // Corrigido
-// import Gallery from "../../public/assets/gallery.png";  // Corrigido
-// import AudioPng from "../../public/assets/audio.svg";  // Corrigido
-// import userBlocked from "../../public/assets/blocked-user.svg";  // Corrigido
-// import PUP from '../../public/assets/PUP.svg';  // Corrigido
-
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PopUpGetNow from "@/components/PopUpGetNow";
 import CongratulationsComponent from "@/components/Congratulations";
@@ -22,11 +6,24 @@ import { RiErrorWarningLine } from "react-icons/ri";
 
 import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 interface PreviousContentProps {
+ // handleViewReport:string,
   username: string;
   firstUser: FirstUser;
   id: string;
   setPrimaryProgress: React.Dispatch<React.SetStateAction<number>>;
+  followers: Follower[];
+  isFetchingData:boolean;
+  highlightData: {
+    thumbnail?: string;
+    highlightId?: string;
+  };
+  congratulation: boolean;
+  setCongratulation: React.Dispatch<React.SetStateAction<boolean>>; 
+  isErro429: boolean;
+  followersError: string | null;
+  followersError2: boolean | null;
 }
+
 
 interface FirstUser {
   id: string;
@@ -49,48 +46,56 @@ interface CustomCSS extends React.CSSProperties {
 const PreviousContent: React.FC<PreviousContentProps> = ({
   username,
   firstUser,
-  // id,
   setPrimaryProgress,
+  setCongratulation,
+  followers,
+  highlightData,
+  congratulation,
+  isErro429,
+  followersError,
+  followersError2,
+  isFetchingData,
 }) => {
-  const [followers, setFollowers] = useState<Follower[]>([]);
-  const [highlightData, setHighlightData] = useState<{
-    thumbnail?: string;
-    highlightId?: string;
-  }>({});
+  //const [followers, setFollowers] = useState<Follower[]>([]);
+  // const [highlightData, setHighlightData] = useState<{
+  //   thumbnail?: string;
+  //   highlightId?: string;
+  // }>({});
+
   const [loading, setLoading] = useState<boolean>(true);
 
   const [endAudio, setEndAudio] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [congratulation, setCongratulation] = useState<boolean>(false);
+ // const [congratulation, setCongratulation] = useState<boolean>(false);
   const [showPopUpCongratulation, setShowPopUpCongratulation] = useState(false);
-  const [isErro429, setIsErro429] = useState<boolean>(false);
+  //const [isErro429, setIsErro429] = useState<boolean>(false);
   //const [isBlocked,setIsBlocked]= useState<boolean>(false);
   //const [isErro429Popup, setIsErro429Popup] = useState<boolean>(false);
   //const [showCongratulation, setShowCongratulation] = useState(false);
 
-  const [followersError, setFollowersError] = useState<string | null>(null);
-  const [followersError2, setFollowersError2] = useState<boolean | null>(false);
-  const [isFetching, setIsFetching] = useState(false);
+  //const [followersError, setFollowersError] = useState<string | null>(null);
+  //const [followersError2, setFollowersError2] = useState<boolean | null>(false);
+  //const [isFetching, setIsFetching] = useState(false);
 
   // const [highlightsError, setHighlightsError] = useState<string | null>(null);
   // const [error, setError] = useState<string | null>(null);
   const [localization, setLocalization] = useState<string>("*******");
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const testMode = urlParams.get("test") === "1";
+  // useEffect(() => {
+  //   const urlParams = new URLSearchParams(window.location.search);
+  //   const testMode = urlParams.get("test") === "1";
 
-    // Modo de teste remove o bloqueio
-    if (testMode) {
-      localStorage.removeItem("blocked429");
-      return;
-    }
+  //   // Modo de teste remove o bloqueio
+  //   if (testMode) {
+  //     localStorage.removeItem("blocked429");
+  //     return;
+  //   }
 
-    // Verificar se está bloqueado
-    if (localStorage.getItem("blocked429")) {
-      setCongratulation(true);
-    }
-  }, []);
+  //   // Verificar se está bloqueado
+  //   if (localStorage.getItem("blocked429")) {
+  //     setCongratulation(true);
+  //   }
+  // }, []);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
@@ -114,11 +119,13 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
   // const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
   useEffect(() => {
     console.log(isErro429);
+    //console.log(followers)
+   
     if (congratulation) {
       // Primeiro popup (aparece depois de 5 segundos)
 
       const timerError = setTimeout(() => {
-        setIsErro429(false);
+       // setIsErro429(false);
       }, 10000);
 
       // Segundo popup (aparece depois de 10 segundos)
@@ -133,7 +140,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
       };
     } else {
       setShowPopUpCongratulation(false);
-      setIsErro429(false); // Garante que os popups desapareçam se `congratulation` for falso
+    //  setIsErro429(false); // Garante que os popups desapareçam se `congratulation` for falso
     }
     const getLocation = () => {
       if (navigator.geolocation) {
@@ -186,102 +193,113 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
     getLocation();
   }, [congratulation]);
   useEffect(() => {
-    const fetchData = async () => {
-      if (isFetching) return;
-      setIsFetching(true);
+    if (followers.length >= 0 || isFetchingData) {
+      setLoading(false);
+    }
   
-      // Verifica bloqueio antes de qualquer operação
-      const isBlocked = localStorage.getItem("blocked429") === "true";
-      if (isBlocked) {
-        setIsErro429(true);
-        setCongratulation(true);
-        setIsFetching(false);
-        return;
-      }
+    console.log("Followers Error:", followersError);
+    console.log("Followers Error 2:", followersError2);
+    console.log("Is Fetching Data:", isFetchingData);
+  }, [loading, followersError, followersError2, isFetchingData]);
   
-      try {
-        setLoading(true);
   
-        // Funções de fetch paralelas
-        const fetchFollowers = async () => {
-          try {
-            const response = await fetch(
-              `https://apiinstagram-ieuw.onrender.com/api/instagram-followers/${username}`
-            );
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (isFetching) return;
+  //     setIsFetching(true);
+  
+  //     // Verifica bloqueio antes de qualquer operação
+  //     const isBlocked = localStorage.getItem("blocked429") === "true";
+  //     if (isBlocked) {
+  //       setIsErro429(true);
+  //       setCongratulation(true);
+  //       setIsFetching(false);
+  //       return;
+  //     }
+  
+  //     try {
+  //       setLoading(true);
+  
+  //       // Funções de fetch paralelas
+  //       const fetchFollowers = async () => {
+  //         try {
+  //           const response = await fetch(
+  //             `https://apiinstagram-ieuw.onrender.com/api/instagram-followers/${username}`
+  //           );
             
-            if (response.status === 429) {
-              localStorage.setItem("blocked429", "true");
-              setCongratulation(true);
-              setIsErro429(true);
-              return;
-            }
+  //           if (response.status === 429) {
+  //             localStorage.setItem("blocked429", "true");
+  //             setCongratulation(true);
+  //             setIsErro429(true);
+  //             return;
+  //           }
   
-            if (!response.ok) {
-              setFollowersError2(true);
-              throw new Error(`Erro HTTP! Status: ${response.status}`);
-            }
+  //           if (!response.ok) {
+  //             setFollowersError2(true);
+  //             throw new Error(`Erro HTTP! Status: ${response.status}`);
+  //           }
   
-            const data = await response.json();
-            if (data.status === "success" && data.followers?.length) {
-              const followers = data.followers.map((follower: Follower) => ({
-                username: follower.username,
-                full_name: follower.full_name,
-                profile_pic_base64: follower.profile_pic_base64 || "data:image/png;base64,...",
-              }));
-              setFollowers(followers);
-              setFollowersError("seguidores carregados");
-            } else {
-              setFollowersError2(true);
-            }
-          } catch (err) {
-            const error = err as Error;
-            if (error.message.includes("429")) {
-              localStorage.setItem("blocked429", "true");
-              setCongratulation(true);
-              setIsErro429(true);
-            }
-            console.error("Erro seguidores:", error);
-            setFollowersError("Erro ao carregar seguidores");
-          }
-        };
+  //           const data = await response.json();
+  //           if (data.status === "success" && data.followers?.length) {
+  //             const followers = data.followers.map((follower: Follower) => ({
+  //               username: follower.username,
+  //               full_name: follower.full_name,
+  //               profile_pic_base64: follower.profile_pic_base64 || "data:image/png;base64,...",
+  //             }));
+  //             setFollowers(followers);
+  //             setFollowersError("seguidores carregados");
+  //           } else {
+  //             setFollowersError2(true);
+  //           }
+  //         } catch (err) {
+  //           const error = err as Error;
+  //           if (error.message.includes("429")) {
+  //             localStorage.setItem("blocked429", "true");
+  //             setCongratulation(true);
+  //             setIsErro429(true);
+  //           }
+  //           console.error("Erro seguidores:", error);
+  //           setFollowersError("Erro ao carregar seguidores");
+  //         }
+  //       };
   
-        const fetchHighlights = async () => {
-          try {
-            const response = await fetch(
-              `https://apiinstagram-ieuw.onrender.com/api/instagram-highlights/${username}`
-            );
+  //       const fetchHighlights = async () => {
+  //         try {
+  //           const response = await fetch(
+  //             `https://apiinstagram-ieuw.onrender.com/api/instagram-highlights/${username}`
+  //           );
             
-            if (response.status === 502) throw new Error("Problema temporário com o Instagram");
-            if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
+  //           if (response.status === 502) throw new Error("Problema temporário com o Instagram");
+  //           if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
   
-            const data = await response.json();
-            if (data.status === "success") {
-              setHighlightData({
-                thumbnail: data.thumbnailBase64,
-                highlightId: data.highlightId,
-              });
-            } else {
-              setFollowersError("Nenhum dado encontrado");
-            }
-          } catch (err) {
-            console.error("Erro highlights:", err);
-            setFollowersError("Erro ao carregar destaques");
-          }
-        };
+  //           const data = await response.json();
+  //           if (data.status === "success") {
+  //             setHighlightData({
+  //               thumbnail: data.thumbnailBase64,
+  //               highlightId: data.highlightId,
+  //             });
+  //           } else {
+  //             setFollowersError("Nenhum dado encontrado");
+  //           }
+  //         } catch (err) {
+  //           console.error("Erro highlights:", err);
+  //           setFollowersError("Erro ao carregar destaques");
+  //         }
+  //       };
   
-        // Executa ambos em paralelo
-        await Promise.allSettled([fetchFollowers(), fetchHighlights()]);
+  //       // Executa ambos em paralelo
+  //       await Promise.allSettled([fetchFollowers(), fetchHighlights()]);
   
-      } catch (error) {
-        console.error("Erro geral:", error);
-      } finally {
-        setIsFetching(false);
-        setLoading(false);
-      }
-    };
+  //     } catch (error) {
+  //       console.error("Erro geral:", error);
+  //     } finally {
+  //       setIsFetching(false);
+  //       setLoading(false);
+  //     }
+  //   };
   
-    fetchData();
-  }, [username]);
+  //   fetchData();
+  // }, [username]);
 
   useEffect(() => {
     const scrollInterval = setInterval(() => {
@@ -336,7 +354,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
             Pessoas que ela mais <b className="text-[#5468FF]">interage</b>
           </h3>
 
-          {loading ? (
+          {isFetchingData ? (
             <div className="mx-auto mt-8 items-center flex flex-col space-y-3">
               <h1 className="font-medium">Buscando dados do <b className="font-medium text-[#5468FF]">@</b></h1>
               <LoadingSpinner />
@@ -428,7 +446,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
               </div>
             </>
           )}
-          {loading ? (
+          {isFetchingData ? (
             <p></p>
           ) : followersError2 ? (
             <>
@@ -553,6 +571,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
               width="30"
               draggable="false"
             /> */}
+            
               <div className="messages select-none pointer-events-none space-y-[3px] pr-[10px] ">
                 <div className="bg-[#3B67EA] text-[14px] w-fit overflow-clip rounded-tl-3xl rounded-br-[4px] rounded-bl-3xl rounded-tr-[4px] px-[14px] py-[8px] text-[#eee]">
                   <img src="/audio.svg" alt="" width="200" draggable="false" />
@@ -716,7 +735,7 @@ const PreviousContent: React.FC<PreviousContentProps> = ({
         <div className="flex flex-col items-start">
           <CongratulationsComponent isErro429={isErro429} />
           {/* <button onClick={()=>setCongratulation(false)}>teste</button> */}
-          {isErro429 && (
+          {!isErro429 && (
             <div
               role="alert"
               className="rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[80%] mx-10"

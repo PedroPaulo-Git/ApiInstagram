@@ -13,8 +13,11 @@ import { RiErrorWarningLine } from "react-icons/ri";
 // import Feedback4 from "../../public/assets/feedback_3.png";
 // import Feedback5 from "../../public/assets/feedback_4.png";
 
-const Congratulations = ({isErro429}) => {
+const Congratulations = ({ isErro429 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [checkoutData, setCheckoutData] = useState({});
+
+
   const feedbacks = [
     "/feedback.png",
     "/feedback_1.png",
@@ -32,6 +35,14 @@ const Congratulations = ({isErro429}) => {
   const [showError429, setShowError429] = useState(false);
   const [vagasData, setVagasData] = useState("");
   useEffect(() => {
+    fetch("/checkout.json")
+      .then((response) => response.json())
+      .then((data) => {
+        setCheckoutData(data); // Armazena os dados do JSON no estado
+      })
+      .catch((error) => {
+        console.error("Erro ao carregar o JSON:", error);
+      });
     // Função para atualizar o tempo restante
     const calculateTimeLeft = () => {
       setTimeLeft((prevTime) => {
@@ -75,18 +86,18 @@ const Congratulations = ({isErro429}) => {
         clearInterval(interval); // Para o timer quando o tempo acabar
       }
     }, 1000);
-   
+
     // Limpa o intervalo quando o componente for desmontado
     return () => clearInterval(interval);
   }, [timeLeft]); // Recalcula sempre que o timeLeft mudar
-  
+
   useEffect(() => {
     if (isErro429) {
       setShowError429(true);
       const timer = setTimeout(() => {
         setShowError429(false);
-      }, 3000); // ⏳ Espera 3 segundos antes de exibir o erro
-     
+      }, 10000); // ⏳ Espera 3 segundos antes de exibir o erro
+
       return () => clearTimeout(timer); // Limpa o timer ao desmontar
     } else {
       setShowError429(false); // Se não for erro 429, esconde o popup
@@ -95,60 +106,67 @@ const Congratulations = ({isErro429}) => {
 
   const nextSlide = () => {
     setCurrentSlide((prevSlide) => {
-      console.log("Slide atual:", prevSlide, "Próximo slide:", (prevSlide + 1) % feedbacks.length);
+      console.log(
+        "Slide atual:",
+        prevSlide,
+        "Próximo slide:",
+        (prevSlide + 1) % feedbacks.length
+      );
       return (prevSlide + 1) % feedbacks.length;
     });
   };
-  
 
   // Passa a imagem automaticamente a cada 3 segundos
   useEffect(() => {
     const interval = setInterval(nextSlide, 3000);
     return () => clearInterval(interval);
   }, [currentSlide]); // Atualiza corretamente
-  
+
   useEffect(() => {
-    fetch('/config.json')
-      .then(response => response.json())
-      .then(data => {
-        document.querySelectorAll('#original-price').forEach((el) => {
+    fetch("/config.json")
+      .then((response) => response.json())
+      .then((data) => {
+        document.querySelectorAll("#original-price").forEach((el) => {
           el.textContent = `de R$ ${data.originalPrice} por:`;
         });
-  
-        document.querySelectorAll('#discount-price').forEach((el) => {
-          el.innerHTML = ''; // Limpa conteúdo anterior
-  
-          const currency = document.createElement('span');
-          currency.textContent = 'R$';
-          currency.classList.add('text-[#5468FF]', 'text-5xl');
-  
-          const price = document.createTextNode(`${data.discountPrice.toFixed(2)}`);
-  
+
+        document.querySelectorAll("#discount-price").forEach((el) => {
+          el.innerHTML = ""; // Limpa conteúdo anterior
+
+          const currency = document.createElement("span");
+          currency.textContent = "R$";
+          currency.classList.add("text-[#5468FF]", "text-5xl");
+
+          const price = document.createTextNode(
+            `${data.discountPrice.toFixed(2)}`
+          );
+
           el.appendChild(currency);
           el.appendChild(price);
         });
-  
-        document.querySelectorAll('#discount-percentage').forEach((el) => {
+
+        document.querySelectorAll("#discount-percentage").forEach((el) => {
           el.textContent = `${data.discountPercentage}% off`;
         });
       })
-      .catch(error => console.error('Erro ao carregar o config.json:', error));
+      .catch((error) =>
+        console.error("Erro ao carregar o config.json:", error)
+      );
   }, []);
-  
-  
+
   return (
     <div className="flex flex-col  mb-28 text-white items-center max-w-[450px] w-full px-2 mx-auto overflow-x-hidden ">
-       {showError429 && (
-      <div
-        role="alert"
-        className="rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[400px] mx-10"
-      >
-        <strong className="flex gap-2 items-center font-medium text-red-800 ">
-          <RiErrorWarningLine className="text-2xl" />
-          Você atingiu o limite de busca!
-        </strong>
-      </div>
-    )}
+      {showError429 && (
+        <div
+          role="alert"
+          className="z-30 rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[400px] mx-10"
+        >
+          <strong className="flex gap-2 items-center font-medium text-red-800 ">
+            <RiErrorWarningLine className="text-2xl" />
+            Você atingiu o limite de busca!
+          </strong>
+        </div>
+      )}
       <div className="absolute left-1/2  -translate-x-1/2 max-w-lg w-[90%] sm:w-80 ">
         <img
           src="/congratulations.png"
@@ -159,8 +177,8 @@ const Congratulations = ({isErro429}) => {
             Parabéns seu relatório foi gerado com sucesso!{" "}
           </h1>
           <h3 className="">
-            <b className="text-[#FF3333]">ATENÇÃO</b> Liberamos apenas um relatório
-            por dispositivo.
+            <b className="text-[#FF3333]">ATENÇÃO</b> Liberamos apenas um
+            relatório por dispositivo.
           </h3>
         </div>
       </div>
@@ -168,8 +186,10 @@ const Congratulations = ({isErro429}) => {
         <img src="/confetti.png" className="w-full h-64 object-cover " />
         <img src="/confetti.png" className="w-full h-64 object-cover " />
       </div>
-      <div className="bg-white shadow-sm rounded-xl justify-center w-full flex flex-wrap
-       items-start px-5 py-6">
+      <div
+        className="bg-white shadow-sm rounded-xl justify-center w-full flex flex-wrap
+       items-start px-5 py-6"
+      >
         {/* <h3 className="text-xl mb-3 text-center text-[#344356] font-bold">
           Oferta por tempo limitado:
         </h3>
@@ -211,14 +231,12 @@ const Congratulations = ({isErro429}) => {
             de R$ 80 por:
           </small>
           <div>
-
-         
-          <h2
-            id="discount-price"
-            className="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold"
-          >
-            <p className="text-[#5468FF] text-2xl">R$</p>37.90
-          </h2> 
+            <h2
+              id="discount-price"
+              className="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold"
+            >
+              <p className="text-[#5468FF] text-2xl">R$</p>37.90
+            </h2>
           </div>
           <div
             id="discount-percentage"
@@ -231,7 +249,7 @@ const Congratulations = ({isErro429}) => {
         <div className="w-full bottom-2 mt-5 flex justify-center items-center ">
           <a
             className=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.ghostpaycheckout.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
+            href={checkoutData.checkoutUrl}
           >
             <p>Acessar Agora</p>
           </a>
@@ -384,7 +402,6 @@ const Congratulations = ({isErro429}) => {
               aria-roledescription="slide"
               className="min-w-0 shrink-0 grow-0 pl-4 basis-full"
             >
-              
               <img
                 src={feedback}
                 width={300}
@@ -398,8 +415,8 @@ const Congratulations = ({isErro429}) => {
       </div>
 
       <p className="my-2 text-center mt-5 text-lg font-semibold">
-        Nossa ferramenta é <b className="text-green-400">limitada</b> ao público,
-        poucas pessoas conseguem ter acesso...
+        Nossa ferramenta é <b className="text-green-400">limitada</b> ao
+        público, poucas pessoas conseguem ter acesso...
       </p>
       <div className="py-1 px-2 rounded-lg bg-[#FF2733] text-white font-bold mt-5 text-center">
         {`Apenas 4 vagas liberadas para ${vagasData}`}
@@ -447,14 +464,12 @@ const Congratulations = ({isErro429}) => {
             de R$ 80 por:
           </small>
           <div>
-
-         
-          <h2
-            id="discount-price"
-            className="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold"
-          >
-            <p className="text-[#5468FF] text-2xl">R$</p>37.90
-          </h2> 
+            <h2
+              id="discount-price"
+              className="font-mono text-[#344356] text-center text-8xl mt-1 font-extrabold"
+            >
+              <p className="text-[#5468FF] text-2xl">R$</p>37.90
+            </h2>
           </div>
           <div
             id="discount-percentage"
@@ -467,7 +482,7 @@ const Congratulations = ({isErro429}) => {
         <div className="w-full bottom-2 mt-5 flex justify-center items-center ">
           <a
             className=" z-20 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-bold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.ghostpaycheckout.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
+            href={checkoutData.checkoutUrl}
           >
             <p>Acessar Agora</p>
           </a>

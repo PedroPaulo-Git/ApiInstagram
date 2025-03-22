@@ -1,12 +1,24 @@
-import React,{useEffect} from 'react'
+import React,{useEffect,useState} from 'react'
 
 const PopUpGetNow = ({showPopUpCongratulation,setShowPopUpCongratulation,username}) => {
+  const [checkoutData, setCheckoutData] = useState({});
+
+  
   useEffect(() => {
     if (showPopUpCongratulation) {
       document.body.style.overflow = "hidden"; // Impede o scroll
     } else {
       document.body.style.overflow = "auto"; // Restaura o scroll
     }
+
+    fetch('/checkout.json')
+      .then((response) => response.json())
+      .then((data) => {
+        setCheckoutData(data); // Armazena os dados do JSON no estado
+      })
+      .catch((error) => {
+        console.error('Erro ao carregar o JSON:', error);
+      });
 
     return () => {
       document.body.style.overflow = "auto"; // Garante que o scroll volte ao normal ao desmontar o componente
@@ -24,7 +36,7 @@ const PopUpGetNow = ({showPopUpCongratulation,setShowPopUpCongratulation,usernam
         <p className="mt-5">Tenha acesso completo e veja tudo em tempo real</p>
         <a
             className=" z-20 text-white mt-4 uppercase bg-[#5468FF] h-10 px-4 py-10 text-xl font-semibold flex bg-primary rounded-2xl w-full justify-center items-center"
-            href="https://pay.ghostpaycheckout.com/checkout/96845eda-224b-41e6-9dc9-aecc33a2c630"
+            href={checkoutData.checkoutUrl}
           >
             <p>ADQUIRA AGORA</p>
           </a>
