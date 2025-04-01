@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from "react";
 // import Image from "next/image";
 import { RiErrorWarningLine } from "react-icons/ri";
-// import CongratulationsImage from "../../public/assets/congratulations.png";
-// import Confetti from "../../public/assets/confetti.png";
-// import Champion from "../../public/assets/champion.svg";
-// import Verify from "../../public/assets/verify-foreground.svg";
-// import Cf from "../../public/assets/cf-logo-1.png";
-
-// import Feedback1 from "../../public/assets/feedback.png";
-// import Feedback2 from "../../public/assets/feedback_1.png";
-// import Feedback3 from "../../public/assets/feedback_2.png";
-// import Feedback4 from "../../public/assets/feedback_3.png";
-// import Feedback5 from "../../public/assets/feedback_4.png";
 
 const Congratulations = ({ isErro429 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -159,7 +148,8 @@ const Congratulations = ({ isErro429 }) => {
       {showError429 && (
             <div
               role="alert"
-              className="rounded-sm border-s-4 border-red-500 bg-red-50 p-4 absolute -top-0 w-[80%] mx-10"
+              className="rounded-sm border-s-4 border-red-500
+               bg-red-50 p-4 absolute -top-0 w-[80%] mx-10 z-40"
             >
               <strong className="flex gap-2 items-center font-medium text-red-800 ">
                 {" "}

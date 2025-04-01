@@ -212,11 +212,7 @@ export default function Home() {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(progressInterval);
-            // setShowImage(true); // Quando atingir 100%, mostra a imagem
-            //setPrimaryProgress(50);
-            // Quando a circular chegar a 100%, a barra principal vai para 50%
-            //setLoadingAnalys(true);
-            //console.log('progress FIRST USER....')
+
             return 100;
           }
 
@@ -232,24 +228,15 @@ export default function Home() {
     if (firstUser) {
       setProgress(100);
       setLoadingAnalys(true);
-      // console.log(loadingAnalys,"-------------------------------")
-      // console.log(loading)
+
     }
-    // console.log(username);
-    // console.log(firstUser);
+
   }, [loading, progressDecry, firstUser]);
 
   useEffect(() => {
-    // if (progress >= 100 && !loadingAnalys) {
-    //   setLoadingAnalys(true);
-    //   console.log(" setLoadingAnalys(true)");
-    // }
 
     if (loadingAnalys) {
       setProgressAnalys(0);
-      //console.log("___________________________!!!!!!!!!!!")
-      // console.log(loadingAnalys)
-      // console.log(progressAnalys)
 
       // Começa o carregamento da barra
       const progressIntervalAnalys = setInterval(() => {
@@ -268,24 +255,24 @@ export default function Home() {
         });
       }, 100); // Atualiza a barra a cada 100ms
     }
-    // if (loadingAnalys >= 100){
-    //   setLoadingAnalys(false);
-    // }
-    // console.log("progress 1 ", progress);
-    // console.log("progress primary ", primaryProgress);
-    // console.log("progress ANALYS ", progressAnalys);
-    // console.log("progress DECRY ", progressDecry);
-    // console.log(loadingAnalys);
+
   }, [loadingAnalys]);
 
   const handleReset = () => {
     setFirstUser(null);
     setLoadingAnalys(true);
   };
+
+
+  //HANDLE SEARCH ------- 
   const handleSearch = async () => {
     
     if (!search) return;
-   
+    const searchCount = parseInt(localStorage.getItem("searchCount") || "0", 10);
+    if (searchCount >= 3) {
+      setIsErro429(true);
+      return;
+    }
     const test429Error = localStorage.getItem("blocked429") === "true";
     if (test429Error) {
       setIsErro429(true);
@@ -318,7 +305,7 @@ export default function Home() {
       });
       setUsername(profileData.username);
       setLoading(false);
-      
+      localStorage.setItem("searchCount", (searchCount + 1).toString());
     } catch (error) {
       ///////////////////////////////////////////////////// -------------------------------------------------- ERRRO PAARA ARRUMAR
       console.error("Erro na busca:", error);
@@ -333,6 +320,7 @@ export default function Home() {
       console.log(formattedSearch); // Verifique o valor de search
     }
   };
+  
 
   if (isErro429) {
     return (

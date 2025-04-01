@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PopUpGetNow from "@/components/PopUpGetNow";
 import CongratulationsComponent from "@/components/Congratulations";
-import { RiErrorWarningLine } from "react-icons/ri";
+
 
 import MediaThemeTailwindAudio from "player.style/tailwind-audio/react";
 interface PreviousContentProps {
