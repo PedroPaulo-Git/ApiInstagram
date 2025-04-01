@@ -12,6 +12,7 @@ app.use(
       "http://localhost:3000",
       "https://espiafacil.com.br",
       "https://espiafacil.info",
+      "https://esp1afacil.shop",
     ],
     methods: ["GET"],
     allowedHeaders: ["Content-Type"],
