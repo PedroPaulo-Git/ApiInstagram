@@ -270,7 +270,9 @@ export default function Home() {
     if (!search) return;
     const searchCount = parseInt(localStorage.getItem("searchCount") || "0", 10);
     if (searchCount >= 3) {
+      localStorage.setItem("blocked429", "true");
       setIsErro429(true);
+      setCongratulation(true);
       return;
     }
     const test429Error = localStorage.getItem("blocked429") === "true";
@@ -525,7 +527,7 @@ export default function Home() {
                 <div>
                   {isErro429 && (
                     <div>
-                      <Congratulations isErro429={isErro429} />
+                      <Congratulations  isErro429={isErro429} />
                     </div>
                   )}
                   {username && firstUser && (
