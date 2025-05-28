@@ -13,6 +13,7 @@ app.use(
       "https://espiafacil.com.br",
       "https://espiafacil.info",
       "https://esp1afacil.shop",
+      "https://instaviewpro.site"
     ],
     methods: ["GET"],
     allowedHeaders: ["Content-Type"],
