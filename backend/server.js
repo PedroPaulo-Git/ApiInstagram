@@ -95,6 +95,7 @@ app.get("/api/instagram-profile-pic/:username", async (req, res) => {
       username: profileData.username,
       full_name: profileData.full_name,
       profile_pic_url: imageDataUrl,
+      is_private: profileData.is_private
     });
   } catch (error) {
     console.error("Erro no proxy:", error);
@@ -136,8 +137,10 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
     const response = await axios.request(options);
     // console.log("Resposta da API recebida:", response.data);
 
-    if (response.data && response.data.users) {
-      response.data.users.forEach(user => {
+if (response.data && Array.isArray(response.data.users) && response.data.users.length > 0) {
+  console.log("Resposta bruta da API:", response.data);
+  console.log("Followers fetch ✅")
+  response.data.users.forEach(user => {
         console.log({
           username: user.username,
           // full_name: user.full_name,
@@ -145,6 +148,7 @@ app.get("/api/instagram-followers/:username", async (req, res) => {
           // profile_pic_url: user.profile_pic_url
         });
       });
+    
     }
     
     if (response.data && response.data.users) {
